@@ -1,0 +1,92 @@
+"use client";
+import { useReducer, useRef } from "react";
+import { consumeFrames, leftoverAfterFrames, SSEFrame } from "./sseParser";
+import { TodoItem, FileRef, SubagentRun, CompressionEvent } from "./types";
+
+export type ResearchState = {
+  todos: TodoItem[];
+  files: FileRef[];
+  subagents: Record<string, SubagentRun>;
+  compressions: CompressionEvent[];
+  report: string;
+  status: "idle" | "streaming" | "done" | "error";
+  error?: string;
+};
+
+export const initial: ResearchState = {
+  todos: [],
+  files: [],
+  subagents: {},
+  compressions: [],
+  report: "",
+  status: "idle",
+};
+
+export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = frame.data as any;
+  switch (frame.event) {
+    case "stream_start":
+      return { ...initial, status: "streaming" };
+    case "todo_updated":
+      return { ...state, todos: data.items };
+    case "file_saved":
+      return { ...state, files: [...state.files.filter((f) => f.path !== data.path), data] };
+    case "subagent_started":
+      return {
+        ...state,
+        subagents: { ...state.subagents, [data.id]: { ...data, status: "running" } },
+      };
+    case "subagent_completed":
+      return {
+        ...state,
+        subagents: {
+          ...state.subagents,
+          [data.id]: { ...state.subagents[data.id], status: "done", summary: data.summary },
+        },
+      };
+    case "compression_triggered":
+      return { ...state, compressions: [...state.compressions, data] };
+    case "text_delta":
+      return { ...state, report: state.report + data.content };
+    case "error":
+      return { ...state, status: "error", error: data.message };
+    case "stream_end":
+      return { ...state, status: "done", report: data.final_report || state.report };
+    default:
+      return state;
+  }
+}
+
+export function useResearchStream() {
+  const [state, dispatch] = useReducer(reducer, initial);
+  const controller = useRef<AbortController | null>(null);
+
+  async function start(question: string) {
+    controller.current?.abort();
+    controller.current = new AbortController();
+    const res = await fetch("/api/research", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ question, thread_id: "default-user" }),
+      signal: controller.current.signal,
+    });
+    if (!res.body) return;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      for (const frame of consumeFrames(buf)) dispatch(frame);
+      buf = leftoverAfterFrames(buf);
+    }
+  }
+
+  function stop() {
+    controller.current?.abort();
+  }
+
+  return { state, start, stop };
+}
