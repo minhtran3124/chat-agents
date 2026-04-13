@@ -37,12 +37,18 @@ class ChunkMapper:
     def __init__(self) -> None:
         self._prev_files: dict[str, str] = {}
         self._prev_todos: list[dict] = []
-        self._active_subagents: dict[str, str] = {}
+        # Tracks tool_call_ids for in-flight `task`-tool subagent invocations.
+        # deepagents invokes subagents inside the `task` tool, so tool_call_id
+        # is the stable identifier across start/complete.
+        self._active_subagents: set[str] = set()
         self._prev_token_count: int | None = None
 
         # Public introspection for the router's synthetic-compression fallback
         self.saw_compression: bool = False
         self.peak_tokens: int = 0
+
+        # Diagnostic: every LangGraph node name seen during this stream
+        self.seen_nodes: set[str] = set()
 
     async def process(self, mode: str, chunk: Any) -> AsyncGenerator[dict, None]:
         logger.debug("[CHUNK_MAPPER] mode=%s", mode)
@@ -51,6 +57,12 @@ class ChunkMapper:
                 yield ev
         elif mode == "messages":
             msg_chunk, _meta = chunk
+            tool_calls = getattr(msg_chunk, "tool_calls", None) or []
+            for tc in tool_calls:
+                logger.info(
+                    "[CHUNK_MAPPER] tool_call name=%s args=%s",
+                    tc.get("name"), str(tc.get("args", {}))[:200],
+                )
             content: str = getattr(msg_chunk, "content", None) or ""
             if content:
                 yield events.text_delta(content)
@@ -63,7 +75,13 @@ class ChunkMapper:
             if not isinstance(update, dict):
                 continue
 
-            logger.debug("[CHUNK_MAPPER] node=%s keys=%s", node_name, list(update.keys()))
+            is_new = node_name not in self.seen_nodes
+            self.seen_nodes.add(node_name)
+            logger.info(
+                "[CHUNK_MAPPER] node=%s keys=%s%s",
+                node_name, list(update.keys()),
+                " (first-seen)" if is_new else "",
+            )
 
             if "todos" in update and update["todos"] != self._prev_todos:
                 self._prev_todos = update["todos"]
@@ -83,26 +101,36 @@ class ChunkMapper:
                             preview=content_str[:500],
                         )
 
-            if node_name in {"researcher", "critic"}:
-                # elif (not two ifs) — a single chunk is treated as either
-                # a start or an end, never both. Matches spec §7 semantics.
-                if node_name not in self._active_subagents:
-                    run_id = _new_id()
-                    self._active_subagents[node_name] = run_id
-                    task = update.get("task", "")
+            # Detect `task` subagent invocations via tool-call metadata.
+            # AIMessage with tool_calls where name == "task" → subagent_started.
+            # ToolMessage whose tool_call_id matches an in-flight task → subagent_completed.
+            for msg in update.get("messages", []) or []:
+                for tc in getattr(msg, "tool_calls", None) or []:
+                    if tc.get("name") != "task":
+                        continue
+                    tc_id = tc.get("id")
+                    if not tc_id or tc_id in self._active_subagents:
+                        continue
+                    args = tc.get("args") or {}
+                    subagent_type = args.get("subagent_type", "unknown")
+                    description = args.get("description", "")
+                    self._active_subagents.add(tc_id)
                     logger.info(
-                        "[CHUNK_MAPPER] subagent_started name=%s run_id=%s task=%r",
-                        node_name, run_id, task[:120],
+                        "[CHUNK_MAPPER] subagent_started tool_call_id=%s type=%s desc=%r",
+                        tc_id, subagent_type, description[:120],
                     )
-                    yield events.subagent_started(run_id, node_name, task)
-                elif update.get("__end__") or update.get("summary"):
-                    run_id = self._active_subagents.pop(node_name)
-                    summary = update.get("summary", "")
+                    yield events.subagent_started(tc_id, subagent_type, description)
+
+                tool_call_id = getattr(msg, "tool_call_id", None)
+                if tool_call_id and tool_call_id in self._active_subagents:
+                    self._active_subagents.discard(tool_call_id)
+                    content = getattr(msg, "content", "") or ""
+                    content_str = content if isinstance(content, str) else str(content)
                     logger.info(
-                        "[CHUNK_MAPPER] subagent_completed name=%s run_id=%s summary=%r",
-                        node_name, run_id, summary[:120],
+                        "[CHUNK_MAPPER] subagent_completed tool_call_id=%s summary=%r",
+                        tool_call_id, content_str[:120],
                     )
-                    yield events.subagent_completed(run_id, summary)
+                    yield events.subagent_completed(tool_call_id, content_str[:500])
 
     async def _handle_values_snapshot(self, snapshot: dict) -> AsyncGenerator[dict, None]:
         try:

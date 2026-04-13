@@ -41,38 +41,116 @@ async def test_new_file_in_files_dict_emits_file_saved():
 
 
 @pytest.mark.asyncio
-async def test_subagent_node_emits_started_then_completed():
+async def test_task_tool_call_emits_subagent_started():
+    """deepagents invokes subagents via a `task` tool — detection happens on
+    AIMessage.tool_calls, not on a LangGraph node named after the subagent."""
+    from langchain_core.messages import AIMessage
+
     from app.streaming.chunk_mapper import ChunkMapper
 
     mapper = ChunkMapper()
-    started = [ev async for ev in mapper.process("updates", {"researcher": {"task": "Research X"}})]
-    assert started[0]["event"] == "subagent_started"
-    completed = [
-        ev
-        async for ev in mapper.process(
-            "updates", {"researcher": {"summary": "found X", "__end__": True}}
-        )
-    ]
-    assert completed[0]["event"] == "subagent_completed"
+    ai = AIMessage(
+        content="",
+        tool_calls=[
+            {
+                "name": "task",
+                "id": "call_abc",
+                "args": {"subagent_type": "researcher", "description": "Research X"},
+            }
+        ],
+    )
+    events = [ev async for ev in mapper.process("updates", {"model": {"messages": [ai]}})]
+    assert len(events) == 1
+    assert events[0]["event"] == "subagent_started"
+    payload = json.loads(events[0]["data"])
+    assert payload == {"id": "call_abc", "name": "researcher", "task": "Research X"}
 
 
 @pytest.mark.asyncio
-async def test_first_chunk_with_both_task_and_summary_emits_only_started():
-    """Regression: protects elif-not-if structure. A first-appearance chunk
-    should always be treated as a start, even if it carries summary fields."""
+async def test_task_tool_response_emits_subagent_completed():
+    from langchain_core.messages import AIMessage, ToolMessage
+
     from app.streaming.chunk_mapper import ChunkMapper
 
     mapper = ChunkMapper()
-    events = [
+    ai = AIMessage(
+        content="",
+        tool_calls=[
+            {
+                "name": "task",
+                "id": "call_abc",
+                "args": {"subagent_type": "researcher", "description": "Research X"},
+            }
+        ],
+    )
+    [ev async for ev in mapper.process("updates", {"model": {"messages": [ai]}})]
+
+    tool_msg = ToolMessage(content="found X", tool_call_id="call_abc", name="task")
+    events = [ev async for ev in mapper.process("updates", {"tools": {"messages": [tool_msg]}})]
+    assert len(events) == 1
+    assert events[0]["event"] == "subagent_completed"
+    payload = json.loads(events[0]["data"])
+    assert payload == {"id": "call_abc", "summary": "found X"}
+
+
+@pytest.mark.asyncio
+async def test_non_task_tool_calls_ignored():
+    """Only `task` tool calls should produce subagent events — other tools
+    (e.g. internet_search, write_todos) must not."""
+    from langchain_core.messages import AIMessage
+
+    from app.streaming.chunk_mapper import ChunkMapper
+
+    mapper = ChunkMapper()
+    ai = AIMessage(
+        content="",
+        tool_calls=[{"name": "internet_search", "id": "call_xyz", "args": {"query": "foo"}}],
+    )
+    events = [ev async for ev in mapper.process("updates", {"model": {"messages": [ai]}})]
+    assert events == []
+
+
+@pytest.mark.asyncio
+async def test_parallel_task_calls_tracked_separately():
+    """Two concurrent task calls must emit independent started/completed pairs
+    keyed by tool_call_id."""
+    from langchain_core.messages import AIMessage, ToolMessage
+
+    from app.streaming.chunk_mapper import ChunkMapper
+
+    mapper = ChunkMapper()
+    ai = AIMessage(
+        content="",
+        tool_calls=[
+            {
+                "name": "task",
+                "id": "call_1",
+                "args": {"subagent_type": "researcher", "description": "topic A"},
+            },
+            {
+                "name": "task",
+                "id": "call_2",
+                "args": {"subagent_type": "critic", "description": "review draft"},
+            },
+        ],
+    )
+    starts = [ev async for ev in mapper.process("updates", {"model": {"messages": [ai]}})]
+    assert [ev["event"] for ev in starts] == ["subagent_started", "subagent_started"]
+    start_ids = {json.loads(ev["data"])["id"] for ev in starts}
+    assert start_ids == {"call_1", "call_2"}
+
+    # Completions arrive in reverse order — both must be recognized.
+    tool_2 = ToolMessage(content="critique OK", tool_call_id="call_2", name="task")
+    tool_1 = ToolMessage(content="research OK", tool_call_id="call_1", name="task")
+    done = [
         ev
         async for ev in mapper.process(
-            "updates",
-            {"researcher": {"task": "X", "summary": "Y", "__end__": True}},
+            "updates", {"tools": {"messages": [tool_2, tool_1]}}
         )
     ]
-    kinds = [ev["event"] for ev in events]
-    assert kinds == ["subagent_started"]
-    assert "subagent_completed" not in kinds
+    assert [ev["event"] for ev in done] == ["subagent_completed", "subagent_completed"]
+    done_ids = [json.loads(ev["data"])["id"] for ev in done]
+    assert done_ids == ["call_2", "call_1"]
 
 
 @pytest.mark.asyncio

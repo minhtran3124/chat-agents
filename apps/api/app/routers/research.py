@@ -63,8 +63,8 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
 
             report_chars = sum(len(p) for p in final_report_parts)
             logger.info(
-                "[RESEARCH] Stream complete thread_id=%s report_chars=%d usage=%s",
-                thread_id, report_chars, usage,
+                "[RESEARCH] Stream complete thread_id=%s report_chars=%d nodes_seen=%s usage=%s",
+                thread_id, report_chars, sorted(mapper.seen_nodes), usage,
             )
             yield events.stream_end(
                 final_report="".join(final_report_parts),

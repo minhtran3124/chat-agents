@@ -1,0 +1,98 @@
+Sample Research Questions — Deep Agents Research Assistant
+==========================================================
+Purpose: Questions that reliably invoke the full subagent chain
+         (write_todos → researcher(s) → draft.md → critic → final report)
+Date: 2026-04-13
+
+
+──────────────────────────────────────────────────────────────────────────────
+QUESTION 1 — Most Reliable (3-4 researcher spawns + critic)
+──────────────────────────────────────────────────────────────────────────────
+
+  Compare LangGraph, AutoGen, and CrewAI for building production multi-agent
+  systems in 2025 — cover architecture, streaming support, memory, and known
+  production failures.
+
+Why it triggers the full flow:
+  - Three named frameworks give the planner 3 clear sub-topics to write as todos.
+  - A 4th todo typically appears for "trade-offs / when to choose each".
+  - "2025" and "production failures" are un-trainable → forces real Tavily searches.
+  - The critic has concrete unsupported claims to flag (failure stories need citations).
+
+Expected SSE events on the dashboard:
+  todo_updated         → ["LangGraph", "AutoGen", "CrewAI", "comparison", "failures"]
+  subagent_started     → researcher "LangGraph architecture and streaming"
+  subagent_completed   → researcher
+  subagent_started     → researcher "AutoGen architecture..."
+  subagent_completed   → researcher
+  subagent_started     → researcher "CrewAI..."
+  subagent_completed   → researcher
+  file_saved           → vfs://draft.md
+  subagent_started     → critic
+  subagent_completed   → critic "[list of unsupported claims]"
+  stream_end           → final revised report
+
+Estimated time: 60–90 seconds.
+
+
+──────────────────────────────────────────────────────────────────────────────
+QUESTION 2 — Good (2-3 researcher spawns, strong VFS file activity)
+──────────────────────────────────────────────────────────────────────────────
+
+  What are the current benchmarks, pricing, and enterprise adoption rates for
+  Claude, GPT-4o, and Gemini 2.0 in April 2025?
+
+Why it triggers the full flow:
+  - Three models × three dimensions (benchmarks, pricing, adoption) = dense research.
+  - "April 2025" and "pricing" are explicitly not in training data → Tavily must run.
+  - Each researcher saves raw search results to VFS → file_saved events visible in sidebar.
+  - Pricing data is easily outdated → critic will flag stale/uncited numbers.
+
+Expected SSE events on the dashboard:
+  todo_updated         → ["Claude benchmarks", "GPT-4o pricing", "Gemini adoption", ...]
+  subagent_started     → researcher (per sub-topic)
+  file_saved           → vfs://search-results-*.md (one per researcher)
+  file_saved           → vfs://draft.md
+  subagent_started     → critic
+  stream_end           → final report with citations
+
+Estimated time: 45–75 seconds.
+
+
+──────────────────────────────────────────────────────────────────────────────
+QUESTION 3 — Most Thorough (5 researcher spawns, compression likely fires)
+──────────────────────────────────────────────────────────────────────────────
+
+  Write a comprehensive research report on the AI agent tooling ecosystem in
+  2025: key frameworks, memory architectures, deployment patterns, evaluation
+  methods, and open research challenges.
+
+Why it triggers the full flow:
+  - Five explicit sub-topics listed → planner writes exactly 5 todos → 5 researcher calls.
+  - Volume of tool results and messages will likely exceed 30,000 tokens →
+    compression_triggered SSE event fires (the only question likely to show this).
+  - Covers every dashboard panel: todos, files, subagents, compression badge, final report.
+
+Expected SSE events on the dashboard:
+  todo_updated         → 5 items (frameworks, memory, deployment, evaluation, challenges)
+  subagent_started/completed × 5  → one per researcher
+  file_saved           → multiple VFS files as researchers save raw results
+  compression_triggered → fires when state token count drops by >30% after compaction
+  subagent_started     → critic
+  file_saved           → vfs://draft.md (revised)
+  stream_end           → long final report
+
+Estimated time: 3–6 minutes.
+
+NOTE: Use this question only after confirming the pipeline is healthy end-to-end
+      with Question 1 first — it's the slowest and most expensive.
+
+
+──────────────────────────────────────────────────────────────────────────────
+RECOMMENDATION
+──────────────────────────────────────────────────────────────────────────────
+
+  Start with Question 1 to verify the subagent chain works.
+  Move to Question 3 once the pipeline is stable — it exercises every
+  capability (todos, VFS files, subagents, compression, critic, full report)
+  in a single run, making it the best end-to-end smoke test.
