@@ -16,8 +16,8 @@ describe("ReportView", () => {
     expect(container.querySelectorAll("td")).toHaveLength(2);
   });
 
-  it("renders em-dash placeholder when text is empty", () => {
+  it("renders welcome card when text is empty", () => {
     const { getByText } = render(<ReportView text="" />);
-    expect(getByText("—")).toBeTruthy();
+    expect(getByText(/what would you like/i)).toBeTruthy();
   });
 });

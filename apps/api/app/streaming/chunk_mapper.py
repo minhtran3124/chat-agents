@@ -74,6 +74,15 @@ class ChunkMapper:
                 yield ev
         elif mode == "messages":
             msg_chunk, _meta = chunk
+            # Only stream text from AI (assistant) message chunks.
+            # ToolMessage, HumanMessage, SystemMessage, etc. must not leak
+            # into the report — their content is internal agent state.
+            msg_type: str = getattr(msg_chunk, "type", "") or ""
+            if msg_type not in ("ai", "AIMessageChunk"):
+                logger.debug(
+                    "[CHUNK_MAPPER] messages: skipping non-AI chunk type=%s", msg_type
+                )
+                return
             tool_calls = getattr(msg_chunk, "tool_calls", None) or []
             for tc in tool_calls:
                 logger.info(

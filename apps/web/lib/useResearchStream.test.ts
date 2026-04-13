@@ -14,7 +14,7 @@ describe("research reducer", () => {
   it("todo_updated replaces items", () => {
     const after = reducer(initial, {
       event: "todo_updated",
-      data: { items: [{ text: "a", status: "pending" }] },
+      data: { items: [{ content: "a", status: "pending" }] },
     });
     expect(after.todos).toHaveLength(1);
   });
@@ -77,6 +77,19 @@ describe("research reducer", () => {
     );
     expect(s.status).toBe("done");
     expect(s.report).toBe("complete");
+  });
+
+  it("stream_end marks all pending/in_progress todos as completed", () => {
+    const withTodos = {
+      ...initial,
+      todos: [
+        { content: "a", status: "completed" as const },
+        { content: "b", status: "in_progress" as const },
+        { content: "c", status: "pending" as const },
+      ],
+    };
+    const s = reducer(withTodos, { event: "stream_end", data: { final_report: "", usage: {} } });
+    expect(s.todos.every((t) => t.status === "completed")).toBe(true);
   });
 
   it("unknown event is a no-op", () => {

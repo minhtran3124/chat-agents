@@ -3,6 +3,10 @@ import { useReducer, useRef } from "react";
 import { consumeFrames, leftoverAfterFrames, SSEFrame } from "./sseParser";
 import { TodoItem, FileRef, SubagentRun, CompressionEvent } from "./types";
 
+function newThreadId(): string {
+  return crypto.randomUUID();
+}
+
 export type ResearchState = {
   todos: TodoItem[];
   files: FileRef[];
@@ -26,6 +30,8 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = frame.data as any;
   switch (frame.event) {
+    case "reset":
+      return initial;
     case "stream_start":
       return { ...initial, status: "streaming" };
     case "todo_updated":
@@ -52,7 +58,16 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
     case "error":
       return { ...state, status: "error", error: data.message };
     case "stream_end":
-      return { ...state, status: "done", report: data.final_report || state.report };
+      return {
+        ...state,
+        status: "done",
+        report: data.final_report || state.report,
+        // Mark any remaining pending/in_progress todos as completed — the
+        // agent doesn't always re-call write_todos at the end of each step.
+        todos: state.todos.map((t) =>
+          t.status !== "completed" ? { ...t, status: "completed" as const } : t,
+        ),
+      };
     default:
       return state;
   }
@@ -68,7 +83,7 @@ export function useResearchStream() {
     const res = await fetch("/api/research", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ question, thread_id: "default-user" }),
+      body: JSON.stringify({ question, thread_id: newThreadId() }),
       signal: controller.current.signal,
     });
     if (!res.body) return;
@@ -88,5 +103,10 @@ export function useResearchStream() {
     controller.current?.abort();
   }
 
-  return { state, start, stop };
+  function reset() {
+    controller.current?.abort();
+    dispatch({ event: "reset", data: {} } as SSEFrame);
+  }
+
+  return { state, start, stop, reset };
 }

@@ -3,18 +3,265 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --cream: #f9f6ef;
+  --paper: #fdfbf5;
+  --ink: #1a1816;
+  --subink: #5c5956;
+  --rule: #d8d3c4;
+  --terracotta: #b5491c;
+  --olive: #5a6b3e;
+  --amber: #b07d1c;
+  --danger: #a63b3b;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-feature-settings: "ss01", "ss02", "cv11";
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* Editorial brief — the research report rendered as a magazine article. */
+/* ---------------------------------------------------------------- */
+.brief {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.brief > *:first-child {
+  margin-top: 0;
+}
+
+.brief h1,
+.brief h2,
+.brief h3,
+.brief h4 {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 72;
+}
+
+.brief h1 {
+  font-size: 2.35rem;
+  line-height: 1.1;
+  margin-top: 0;
+  margin-bottom: 0.7em;
+}
+
+.brief h2 {
+  font-size: 1.55rem;
+  line-height: 1.2;
+  margin-top: 2em;
+  margin-bottom: 0.55em;
+}
+
+.brief h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6em;
+  margin-bottom: 0.4em;
+}
+
+.brief p {
+  margin: 0 0 1em;
+}
+
+.brief > p:first-of-type::first-letter {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-variation-settings: "opsz" 144;
+  font-weight: 500;
+  font-size: 3.6em;
+  float: left;
+  line-height: 0.82;
+  padding: 0.06em 0.1em 0 0;
+  color: var(--ink);
+}
+
+.brief a {
+  color: var(--terracotta);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.brief a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.brief strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.brief em {
+  font-style: italic;
+}
+
+.brief blockquote {
+  border-left: 2px solid var(--terracotta);
+  padding: 0.1em 0 0.1em 1.1em;
+  margin: 1.3em 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-size: 1.05em;
+  color: var(--subink);
+}
+
+.brief code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 0.08em 0.38em;
+  border-radius: 3px;
+  font-size: 0.88em;
+}
+
+.brief pre {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  margin: 1.3em 0;
+  font-size: 0.92em;
+  line-height: 1.55;
+}
+
+.brief pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+.brief ul,
+.brief ol {
+  margin: 0 0 1em 0;
+  padding-left: 1.4em;
+}
+
+.brief ul > li {
+  list-style: disc;
+}
+
+.brief ol > li {
+  list-style: decimal;
+}
+
+.brief li {
+  margin-bottom: 0.35em;
+  line-height: 1.65;
+}
+
+.brief li > p {
+  margin: 0;
+}
+
+.brief table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4em 0;
+  font-size: 0.93em;
+}
+
+.brief th,
+.brief td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.55em 0.8em;
+  text-align: left;
+  vertical-align: top;
+}
+
+.brief th {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 600;
+  background: rgba(181, 73, 28, 0.05);
+  letter-spacing: 0.01em;
+}
+
+.brief hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2em 0;
+}
+
+/* Suppress drop-cap while the report is still streaming */
+.brief-streaming > p:first-of-type::first-letter {
+  all: unset;
+}
+
+/* Blinking cursor appended during streaming */
+.brief-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--terracotta);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: blink 0.9s step-start infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- */
+/* Motion */
+/* ---------------------------------------------------------------- */
+@keyframes softPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200px 0;
+  }
+  to {
+    background-position: 200px 0;
   }
 }

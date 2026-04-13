@@ -1,20 +1,42 @@
 import { FileRef } from "@/lib/types";
 
 export function FileList({ files }: { files: FileRef[] }) {
-  if (files.length === 0) return null;
   return (
-    <div className="border-b p-3">
-      <h3 className="mb-2 font-semibold">
-        📁 Files (vFS){" "}
-        <span className="text-xs font-normal text-gray-400">({files.length})</span>
-      </h3>
-      <ul className="max-h-80 space-y-1 overflow-y-auto pr-1 font-mono text-sm">
-        {files.map((f) => (
-          <li key={f.path} title={f.preview}>
-            {f.path} <span className="text-gray-400">({f.size_tokens.toLocaleString()} tok)</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <section className="p-6">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="font-display text-base font-semibold tracking-tight">Notes &amp; sources</h2>
+        {files.length > 0 && (
+          <span className="text-xs tabular-nums text-subink">{files.length}</span>
+        )}
+      </div>
+      {files.length === 0 ? (
+        <p className="text-sm italic leading-snug text-subink/80">
+          The notebook clips research sources and drafts here as they&rsquo;re saved.
+        </p>
+      ) : (
+        <ul className="max-h-80 space-y-1.5 overflow-y-auto pr-1 font-mono text-xs">
+          {files.map((f) => (
+            <li
+              key={f.path}
+              title={`${f.path}\n\n${f.preview}`}
+              className="flex items-start gap-2"
+            >
+              <span className="mt-[3px] flex-none text-terracotta" aria-hidden>
+                ▸
+              </span>
+              <span className="min-w-0 flex-1 truncate text-ink/80">{prettyName(f.path)}</span>
+              <span className="flex-none tabular-nums text-subink">
+                {f.size_tokens.toLocaleString()}t
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
+}
+
+function prettyName(path: string): string {
+  const stripped = path.replace(/^\//, "").replace(/^(deep_agents|large_tool_results)\//, "");
+  return stripped.length > 48 ? "…" + stripped.slice(-45) : stripped;
 }

@@ -1,5 +1,4 @@
 import { SubagentRun, CompressionEvent } from "@/lib/types";
-import { CompressionBadge } from "./CompressionBadge";
 
 export function SubagentPanel({
   runs,
@@ -10,23 +9,49 @@ export function SubagentPanel({
 }) {
   const list = Object.values(runs);
   return (
-    <div className="border-b p-3">
-      <h3 className="mb-2 font-semibold">
-        🤖 Subagents <CompressionBadge events={compressions} />
-      </h3>
+    <section className="border-b border-rule p-6">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="font-display text-base font-semibold tracking-tight">Researchers</h2>
+        {compressions.length > 0 && (
+          <span className="rounded-full bg-amber/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-caps text-amber">
+            Memory refreshed ×{compressions.length}
+          </span>
+        )}
+      </div>
       {list.length === 0 ? (
-        <div className="text-sm text-gray-400">None spawned yet</div>
+        <p className="text-sm italic leading-snug text-subink/80">
+          When a specialist is called in, you&rsquo;ll see their task here.
+        </p>
       ) : (
-        <ul className="space-y-1 text-sm">
+        <ul className="max-h-80 space-y-2.5 overflow-y-auto pr-1">
           {list.map((r) => (
-            <li key={r.id}>
-              <span className="font-mono">{r.name}</span>{" "}
-              <span className="text-gray-500">{r.task}</span>{" "}
-              <span>{r.status === "done" ? "✓" : "⏳"}</span>
+            <li
+              key={r.id}
+              className="animate-fade-in-up rounded-sm border border-rule bg-paper/80 px-3.5 py-3 text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={`h-2 w-2 flex-none rounded-full ${
+                    r.status === "running" ? "bg-terracotta animate-soft-pulse" : "bg-olive"
+                  }`}
+                />
+                <span className="font-display text-sm font-semibold capitalize tracking-tight text-ink">
+                  {r.name}
+                </span>
+                <span className="ml-auto text-[10px] uppercase tracking-caps text-subink">
+                  {r.status === "running" ? "working" : "done"}
+                </span>
+              </div>
+              <p className="mt-2 line-clamp-3 leading-snug text-subink">{r.task}</p>
+              {r.summary && (
+                <p className="mt-2.5 line-clamp-3 border-t border-rule pt-2.5 text-xs leading-snug text-ink/75">
+                  {r.summary}
+                </p>
+              )}
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

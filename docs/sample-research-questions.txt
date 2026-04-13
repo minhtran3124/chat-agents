@@ -39,8 +39,8 @@ Estimated time: 60–90 seconds.
 QUESTION 2 — Good (2-3 researcher spawns, strong VFS file activity)
 ──────────────────────────────────────────────────────────────────────────────
 
-  What are the current benchmarks, pricing, and enterprise adoption rates for
-  Claude, GPT-4o, and Gemini 2.0 in April 2025?
+What are the current benchmarks, pricing, and enterprise adoption rates for
+Claude, GPT-4o, and Gemini 2.0 in April 2025?
 
 Why it triggers the full flow:
   - Three models × three dimensions (benchmarks, pricing, adoption) = dense research.

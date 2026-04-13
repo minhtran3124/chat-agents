@@ -1,32 +1,47 @@
 import { TodoItem } from "@/lib/types";
 
-const ICON = { pending: "⏳", in_progress: "▶", done: "✓" } as const;
+const STATUS_STYLE: Record<TodoItem["status"], { dot: string; text: string }> = {
+  pending: { dot: "bg-rule", text: "text-subink" },
+  in_progress: { dot: "bg-terracotta animate-soft-pulse", text: "text-ink font-medium" },
+  completed: { dot: "bg-olive", text: "text-subink line-through" },
+};
 
 export function TodoList({ items }: { items: TodoItem[] }) {
-  if (items.length === 0) return <Empty label="No plan yet" />;
+  const done = items.filter((t) => t.status === "completed").length;
   return (
-    <Section title="📋 To-do">
-      <ul className="space-y-1 text-sm">
-        {items.map((t, i) => (
-          <li key={i} className={t.status === "done" ? "opacity-50" : ""}>
-            <span className="mr-2">{ICON[t.status]}</span>
-            {t.text}
-          </li>
-        ))}
-      </ul>
-    </Section>
+    <section className="border-b border-rule p-6">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="font-display text-base font-semibold tracking-tight">Plan</h2>
+        {items.length > 0 && (
+          <span className="text-xs tabular-nums text-subink">
+            {done} / {items.length}
+          </span>
+        )}
+      </div>
+      {items.length === 0 ? (
+        <p className="text-sm italic leading-snug text-subink/80">
+          A plan will appear here as soon as research begins.
+        </p>
+      ) : (
+        <ol className="max-h-80 space-y-2.5 overflow-y-auto pr-1 text-sm">
+          {items.map((t, i) => {
+            const s = STATUS_STYLE[t.status] ?? STATUS_STYLE.pending;
+            return (
+              <li
+                key={i}
+                className="animate-fade-in-up flex items-start gap-3 leading-snug"
+                style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}
+              >
+                <span
+                  className={`mt-1.5 h-2 w-2 flex-none rounded-full ${s.dot}`}
+                  aria-hidden
+                />
+                <span className={s.text}>{t.content}</span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
   );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="border-b p-3">
-      <h3 className="mb-2 font-semibold">{title}</h3>
-      {children}
-    </div>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return <div className="border-b p-3 text-sm text-gray-400">{label}</div>;
 }

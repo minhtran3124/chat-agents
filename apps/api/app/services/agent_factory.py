@@ -20,9 +20,12 @@ Return a bulleted list of issues. Do NOT rewrite."""
 
 MAIN_PROMPT = """You are an expert research assistant. Given a research question:
 
-1. Use `write_todos` to break the question into 3-5 sub-topics.
+1. Use `write_todos` to break the question into 3-5 sub-topics, all with status "pending".
 2. Read user preferences from the store (namespace="preferences").
-3. For each sub-topic, spawn the `researcher` subagent with a specific focus.
+3. For each sub-topic (in order):
+   a. Call `write_todos` to set that item's status to "in_progress" (keep others unchanged).
+   b. Spawn the `researcher` subagent with a specific focus on that sub-topic.
+   c. Call `write_todos` to set that item's status to "completed".
 4. Synthesize findings into a draft report saved to virtual FS as `draft.md`.
 5. Spawn the `critic` subagent to review the draft.
 6. Revise based on critic feedback, then output the final markdown report.

@@ -9,8 +9,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        cream: "#f9f6ef",
+        paper: "#fdfbf5",
+        ink: "#1a1816",
+        subink: "#5c5956",
+        rule: "#d8d3c4",
+        terracotta: "#b5491c",
+        olive: "#5a6b3e",
+        amber: "#b07d1c",
+        danger: "#a63b3b",
+      },
+      fontFamily: {
+        display: ["var(--font-fraunces)", "Georgia", "serif"],
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+      },
+      letterSpacing: {
+        caps: "0.12em",
       },
     },
   },

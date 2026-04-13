@@ -1,5 +1,5 @@
-export type TodoStatus = "pending" | "in_progress" | "done";
-export type TodoItem = { text: string; status: TodoStatus };
+export type TodoStatus = "pending" | "in_progress" | "completed";
+export type TodoItem = { content: string; status: TodoStatus };
 export type FileRef = { path: string; size_tokens: number; preview: string };
 export type SubagentRun = {
   id: string;
