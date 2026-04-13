@@ -11,17 +11,21 @@ Each capability is **observable on a live dashboard** rather than buried in logs
 
 ## Screenshots
 
-**Research in progress** — plan forms, researchers spawn, and the report streams in real time:
+**Full dashboard** — question submitted, plan active, researchers working, welcome screen before first input:
 
-![Streaming research](./docs/screenshots/streaming.png)
+![Dashboard overview](./docs/screenshots/dashboard.png)
 
-**Virtual filesystem** — researchers save raw results to VFS as they dig in:
+**Plan** — 3 / 3 sub-topics completed with strikethrough styling once research finishes:
 
-![Files sidebar](./docs/screenshots/files.png)
+![Plan completed](./docs/screenshots/plan.png)
 
-**Completed report** — full markdown brief with citations, all panels populated:
+**Researchers** — each specialist shown with task description and summary once done:
 
-![Completed report](./docs/screenshots/completed.png)
+![Researchers panel](./docs/screenshots/researchers.png)
+
+**Notes & sources** — virtual filesystem files saved by researchers, with token counts:
+
+![Files panel](./docs/screenshots/files.png)
 
 ## Repository Layout
 
