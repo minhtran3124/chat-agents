@@ -4,7 +4,7 @@ import logging
 import traceback
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sse_starlette.sse import EventSourceResponse
 
 from app.schemas.research import ResearchRequest
@@ -26,11 +26,14 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
     versions_used = registry.resolve_versions(overrides)
     thread_id = payload.thread_id or "default-user"
 
-    agent = build_research_agent(
-        main_prompt=registry.get("main", version=versions_used["main"]),
-        researcher_prompt=registry.get("researcher", version=versions_used["researcher"]),
-        critic_prompt=registry.get("critic", version=versions_used["critic"]),
-    )
+    try:
+        agent = build_research_agent(
+            main_prompt=registry.get("main", version=versions_used["main"]),
+            researcher_prompt=registry.get("researcher", version=versions_used["researcher"]),
+            critic_prompt=registry.get("critic", version=versions_used["critic"]),
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     mapper = ChunkMapper()
     final_report_parts: list[str] = []
 
