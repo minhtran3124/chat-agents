@@ -313,6 +313,22 @@ body {
   animation: skeletonShimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+/* Asked-card entrance — fires the instant Enter is pressed */
+@keyframes askedSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-asked-slide {
+  animation: askedSlide 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 /* ---------------------------------------------------------------- */
 /* Toast notifications — subagent completion pings, 5s lifetime.    */
 /* ---------------------------------------------------------------- */

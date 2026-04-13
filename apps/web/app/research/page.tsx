@@ -8,6 +8,7 @@ import { SubagentPanel } from "./components/SubagentPanel";
 import { ReportView } from "./components/ReportView";
 import { StatusBadge } from "./components/StatusBadge";
 import { ToastStack, ToastItem } from "./components/SubagentToast";
+import { AskedCard } from "./components/AskedCard";
 
 export default function ResearchPage() {
   const { state, start, reset } = useResearchStream();
@@ -72,6 +73,13 @@ export default function ResearchPage() {
       </header>
 
       <QuestionForm onSubmit={start} disabled={busy} loading={loading} />
+
+      {/* Pinned acknowledgment card — the "immediate indicator" that
+          appears the instant Enter is pressed and persists through the
+          whole run. */}
+      {state.question && state.status !== "idle" && (
+        <AskedCard question={state.question} status={state.status} />
+      )}
 
       {/* indeterminate loading bar — only visible during "loading" phase */}
       {loading && <div className="loading-bar" aria-hidden />}

@@ -14,6 +14,7 @@ export type ResearchState = {
   compressions: CompressionEvent[];
   report: string;
   status: "idle" | "loading" | "streaming" | "done" | "error";
+  question?: string;
   error?: string;
 };
 
@@ -33,9 +34,9 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
     case "reset":
       return initial;
     case "loading_start":
-      return { ...initial, status: "loading" };
+      return { ...initial, status: "loading", question: data.question };
     case "stream_start":
-      return { ...initial, status: "streaming" };
+      return { ...initial, status: "streaming", question: state.question };
     case "todo_updated":
       return { ...state, todos: data.items };
     case "file_saved":
@@ -83,8 +84,10 @@ export function useResearchStream() {
     controller.current?.abort();
     controller.current = new AbortController();
     // Flip to "loading" immediately so the UI shows a spinner while the
-    // request is in flight, before the first SSE event arrives.
-    dispatch({ event: "loading_start", data: {} } as SSEFrame);
+    // request is in flight, before the first SSE event arrives.  Include
+    // the question so the page can render a pinned "asked" card as
+    // acknowledgement the instant Enter is pressed.
+    dispatch({ event: "loading_start", data: { question } } as SSEFrame);
     const res = await fetch("/api/research", {
       method: "POST",
       headers: { "content-type": "application/json" },
