@@ -13,7 +13,7 @@ export type ResearchState = {
   subagents: Record<string, SubagentRun>;
   compressions: CompressionEvent[];
   report: string;
-  status: "idle" | "streaming" | "done" | "error";
+  status: "idle" | "loading" | "streaming" | "done" | "error";
   error?: string;
 };
 
@@ -32,6 +32,8 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
   switch (frame.event) {
     case "reset":
       return initial;
+    case "loading_start":
+      return { ...initial, status: "loading" };
     case "stream_start":
       return { ...initial, status: "streaming" };
     case "todo_updated":
@@ -80,6 +82,9 @@ export function useResearchStream() {
   async function start(question: string) {
     controller.current?.abort();
     controller.current = new AbortController();
+    // Flip to "loading" immediately so the UI shows a spinner while the
+    // request is in flight, before the first SSE event arrives.
+    dispatch({ event: "loading_start", data: {} } as SSEFrame);
     const res = await fetch("/api/research", {
       method: "POST",
       headers: { "content-type": "application/json" },

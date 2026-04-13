@@ -11,6 +11,16 @@ describe("research reducer", () => {
     expect(after.report).toBe("");
   });
 
+  it("loading_start sets status to loading and clears previous state", () => {
+    const after = reducer(
+      { ...initial, report: "stale", status: "done" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { event: "loading_start", data: {} } as any,
+    );
+    expect(after.status).toBe("loading");
+    expect(after.report).toBe("");
+  });
+
   it("todo_updated replaces items", () => {
     const after = reducer(initial, {
       event: "todo_updated",

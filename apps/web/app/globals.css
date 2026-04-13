@@ -265,3 +265,85 @@ body {
     background-position: 200px 0;
   }
 }
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 0.9s linear infinite;
+}
+
+/* ---------------------------------------------------------------- */
+/* Toast notifications — subagent completion pings, 5s lifetime.    */
+/* ---------------------------------------------------------------- */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+.toast-enter {
+  animation: toastIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.toast-exit {
+  animation: toastOut 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* Progress bar that drains over 5 seconds — matches the toast TTL. */
+@keyframes toastDrain {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+.toast-drain {
+  animation: toastDrain 5s linear both;
+  transform-origin: left;
+}
+
+/* ---------------------------------------------------------------- */
+/* Loading shimmer bar — sits under QuestionForm while "loading".   */
+/* ---------------------------------------------------------------- */
+@keyframes loadingSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+.loading-bar {
+  position: relative;
+  height: 2px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.loading-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 25%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--terracotta) 50%,
+    transparent 100%
+  );
+  animation: loadingSlide 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

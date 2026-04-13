@@ -1,7 +1,43 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-type Status = "idle" | "streaming" | "done" | "error";
+type Status = "idle" | "loading" | "streaming" | "done" | "error";
+
+/**
+ * Normalise agent output before handing it to react-markdown.
+ *
+ * Problems we fix:
+ * 1. Agent preamble — short prose before the first heading ("Here is the
+ *    final report…") gets stripped so the drop-cap lands on real content.
+ * 2. Trailing ** / *** on heading lines — the agent sometimes leaves stray
+ *    emphasis markers at the end of an h2/h3; remove them.
+ * 3. *** as section dividers — react-markdown can misparse standalone ***
+ *    as bold-italic delimiters instead of a thematic break, especially
+ *    without blank lines.  Replace them with unambiguous --- separators.
+ */
+function sanitizeReport(text: string): string {
+  let out = text
+    // 1. Normalise standalone *** / **** lines → --- (thematic break)
+    //    Must run before the heading fix so we don't touch emphasis inside text.
+    .replace(/^[ \t]*\*{3,}[ \t]*$/gm, "---")
+    // 2. Remove stray trailing ** or *** at end of heading lines
+    .replace(/(^#{1,6} .+?)\s*\*{2,3}[ \t]*$/gm, "$1")
+    .trim();
+
+  // 3. Strip short agent preamble that appears before the first heading.
+  //    Only remove it when it looks like commentary (no list/quote markers,
+  //    shorter than 300 chars) so we don't accidentally drop a text-only report.
+  const firstHeading = out.search(/^#{1,6} /m);
+  if (firstHeading > 0) {
+    const preamble = out.slice(0, firstHeading);
+    const looksLikeCommentary = preamble.length < 300 && !/^[-*>]|\d+\./m.test(preamble);
+    if (looksLikeCommentary) {
+      out = out.slice(firstHeading).trim();
+    }
+  }
+
+  return out;
+}
 
 export function ReportView({
   text,
@@ -13,6 +49,7 @@ export function ReportView({
   if (!text) return <Welcome />;
 
   const streaming = status === "streaming";
+  const clean = sanitizeReport(text);
 
   return (
     <div className="mx-auto max-w-3xl px-10 py-14">
@@ -29,7 +66,7 @@ export function ReportView({
       </div>
       {/* brief-streaming disables the drop-cap while output is mid-stream */}
       <article className={streaming ? "brief brief-streaming" : "brief"}>
-        <Markdown remarkPlugins={[remarkGfm]}>{text}</Markdown>
+        <Markdown remarkPlugins={[remarkGfm]}>{clean}</Markdown>
         {streaming && <span className="brief-cursor" aria-hidden />}
       </article>
     </div>
