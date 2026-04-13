@@ -50,7 +50,7 @@ def test_list_versions_sorted(tmp_path):
         prompts={"main": {"v1": "a", "v2": "b", "v2-concise": "c"}},
         active={"main": "v1"},
     )
-    assert reg.list_versions("main") == ["v1", "v2", "v2-concise"]
+    assert reg.list_versions("main") == ["v1", "v2", "v2-concise"]  # alphabetical / lexicographic
 
 
 def test_active_versions_returns_copy(tmp_path):
@@ -100,6 +100,7 @@ def test_resolve_versions_unknown_key_ignored(tmp_path):
     )
     resolved = reg.resolve_versions({"main": "v1", "nonexistent": "v9"})
     assert "nonexistent" not in resolved
+    assert resolved == {"main": "v1"}
 
 
 # ── Error contract ────────────────────────────────────────────────────────────
@@ -155,6 +156,7 @@ def test_missing_active_yaml_entry_falls_back_to_v1(tmp_path):
     """A prompt present on disk but absent from active.yaml should fall back to v1."""
     from app.services.prompt_registry import PromptRegistry
 
+    # bypass helper — needs explicit empty/missing active.yaml or directory
     (tmp_path / "main").mkdir()
     (tmp_path / "main" / "v1.md").write_text("prompt text")
     (tmp_path / "active.yaml").write_text(yaml.dump({}))  # no entry for 'main'
@@ -166,6 +168,7 @@ def test_missing_active_yaml_entry_falls_back_to_v1(tmp_path):
 def test_missing_active_yaml_file_raises(tmp_path):
     from app.services.prompt_registry import PromptRegistry
 
+    # bypass helper — needs explicit empty/missing active.yaml or directory
     (tmp_path / "main").mkdir()
     (tmp_path / "main" / "v1.md").write_text("text")
     # active.yaml intentionally not created
@@ -177,16 +180,18 @@ def test_missing_active_yaml_file_raises(tmp_path):
 def test_missing_prompts_dir_raises(tmp_path):
     from app.services.prompt_registry import PromptRegistry
 
+    # bypass helper — needs explicit empty/missing active.yaml or directory
     missing = tmp_path / "does_not_exist"
-    with pytest.raises(RuntimeError, match="not found"):
+    with pytest.raises(RuntimeError, match="Prompts directory.*not found"):
         PromptRegistry(prompts_dir=missing)
 
 
 def test_empty_md_file_raises(tmp_path):
     from app.services.prompt_registry import PromptRegistry
 
+    # bypass helper — needs explicit empty/missing active.yaml or directory
     (tmp_path / "main").mkdir()
-    (tmp_path / "main" / "v1.md").write_text("   ")  # whitespace only
+    (tmp_path / "main" / "v1.md").write_text("   ")  # whitespace-only — treated same as empty
     (tmp_path / "active.yaml").write_text(yaml.dump({"main": "v1"}))
 
     with pytest.raises(ValueError, match="is empty"):
