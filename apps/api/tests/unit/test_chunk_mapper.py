@@ -166,6 +166,25 @@ async def test_token_drop_below_70_pct_triggers_compression():
 
 
 @pytest.mark.asyncio
+async def test_overwrite_wrapped_messages_does_not_crash():
+    """Regression: LangGraph Overwrite channel wrapper on 'messages' field.
+    update.get('messages') returns Overwrite(value=[...]) not a bare list —
+    iterating it directly raises TypeError: 'Overwrite' object is not iterable."""
+    from app.streaming.chunk_mapper import ChunkMapper
+
+    class FakeOverwrite:
+        """Minimal stand-in for langgraph's Overwrite channel type."""
+        def __init__(self, value: list) -> None:
+            self.value = value
+
+    mapper = ChunkMapper()
+    chunk = {"main": {"messages": FakeOverwrite(value=[])}}
+    # Must not raise, must produce no events (empty message list)
+    evts = [ev async for ev in mapper.process("updates", chunk)]
+    assert evts == []
+
+
+@pytest.mark.asyncio
 async def test_non_string_file_content_does_not_crash():
     """Regression: deepagents may store file payloads as dicts/lists.
     tiktoken.encode() throws 'expected string or buffer' on non-strings —

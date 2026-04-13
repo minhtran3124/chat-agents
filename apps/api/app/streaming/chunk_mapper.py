@@ -23,6 +23,23 @@ def _new_id() -> str:
     return uuid.uuid4().hex
 
 
+def _as_list(val: object) -> list:
+    """Return a plain list from val, unwrapping LangGraph channel wrappers.
+
+    LangGraph update dicts can contain channel-annotation objects such as
+    ``Overwrite(value=[...])`` or ``Add([...])`` instead of bare lists.
+    Both expose the underlying sequence via a ``.value`` or ``.values``
+    attribute; fall back to an empty list for anything else.
+    """
+    if isinstance(val, list):
+        return val
+    for attr in ("value", "values"):
+        inner = getattr(val, attr, None)
+        if isinstance(inner, list):
+            return inner
+    return []
+
+
 def _estimate_state_tokens(snapshot: dict) -> int:
     total = 0
     for m in snapshot.get("messages", []):
@@ -104,7 +121,7 @@ class ChunkMapper:
             # Detect `task` subagent invocations via tool-call metadata.
             # AIMessage with tool_calls where name == "task" → subagent_started.
             # ToolMessage whose tool_call_id matches an in-flight task → subagent_completed.
-            for msg in update.get("messages", []) or []:
+            for msg in _as_list(update.get("messages")):
                 for tc in getattr(msg, "tool_calls", None) or []:
                     if tc.get("name") != "task":
                         continue
