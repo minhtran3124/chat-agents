@@ -67,5 +67,16 @@ def error(message: str, recoverable: bool = False) -> dict:
     return _sse("error", {"message": message, "recoverable": recoverable})
 
 
-def stream_end(final_report: str, usage: dict[str, Any]) -> dict:
-    return _sse("stream_end", {"final_report": final_report, "usage": usage})
+def stream_end(
+    final_report: str,
+    usage: dict[str, Any],
+    versions_used: dict[str, str],
+) -> dict:
+    return _sse(
+        "stream_end",
+        {
+            "final_report": final_report,
+            "usage": usage,
+            "versions_used": versions_used,
+        },
+    )

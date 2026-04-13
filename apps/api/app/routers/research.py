@@ -1,13 +1,15 @@
+# apps/api/app/routers/research.py
 import json
 import logging
 import traceback
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sse_starlette.sse import EventSourceResponse
 
 from app.schemas.research import ResearchRequest
 from app.services.agent_factory import build_research_agent
+from app.services.prompt_registry import registry
 from app.streaming import events
 from app.streaming.chunk_mapper import ChunkMapper
 
@@ -20,15 +22,25 @@ SYNTHETIC_COMPRESSION_THRESHOLD_TOKENS = 30_000
 
 @router.post("")
 async def research(payload: ResearchRequest) -> EventSourceResponse:
-    agent = build_research_agent()
+    overrides = payload.prompt_versions or {}
+    versions_used = registry.resolve_versions(overrides)
     thread_id = payload.thread_id or "default-user"
+
+    try:
+        agent = build_research_agent(
+            main_prompt=registry.get("main", version=versions_used["main"]),
+            researcher_prompt=registry.get("researcher", version=versions_used["researcher"]),
+            critic_prompt=registry.get("critic", version=versions_used["critic"]),
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     mapper = ChunkMapper()
     final_report_parts: list[str] = []
 
     async def generator() -> AsyncGenerator[dict, None]:
         logger.info(
-            "[RESEARCH] Agent invoked thread_id=%s question=%r",
-            thread_id, payload.question[:120],
+            "[RESEARCH] Agent invoked thread_id=%s prompt_versions=%s question=%r",
+            thread_id, versions_used, payload.question[:120],
         )
         yield events.stream_start(thread_id)
         try:
@@ -42,9 +54,6 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
                         final_report_parts.append(json.loads(ev["data"])["content"])
                     yield ev
 
-            # Synthetic-compression fallback (spec §9.1):
-            # If no real compression was observed but session was large,
-            # emit one synthetic event so Success Criterion #4 is observable.
             if (
                 not mapper.saw_compression
                 and mapper.peak_tokens > SYNTHETIC_COMPRESSION_THRESHOLD_TOKENS
@@ -63,12 +72,15 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
 
             report_chars = sum(len(p) for p in final_report_parts)
             logger.info(
-                "[RESEARCH] Stream complete thread_id=%s report_chars=%d nodes_seen=%s usage=%s",
-                thread_id, report_chars, sorted(mapper.seen_nodes), usage,
+                "[RESEARCH] Stream complete thread_id=%s report_chars=%d "
+                "nodes_seen=%s prompt_versions=%s usage=%s",
+                thread_id, report_chars, sorted(mapper.seen_nodes),
+                versions_used, usage,
             )
             yield events.stream_end(
                 final_report="".join(final_report_parts),
                 usage=usage,
+                versions_used=versions_used,
             )
         except Exception as e:
             logger.error(

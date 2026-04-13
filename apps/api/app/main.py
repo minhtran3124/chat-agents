@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
 from app.routers import research as research_router
+from app.services.prompt_registry import registry
 from app.stores.memory_store import lifespan_stores
 
 logging.basicConfig(
@@ -17,6 +18,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    registry.reload()   # fail fast: raises RuntimeError if prompts/ is missing
     async with lifespan_stores():
         yield
 

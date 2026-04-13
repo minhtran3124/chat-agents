@@ -30,7 +30,11 @@ async def test_build_research_agent_wires_subagents_and_store(monkeypatch):
         from app.stores.memory_store import lifespan_stores
 
         async with lifespan_stores():
-            agent = agent_factory.build_research_agent()
+            agent = agent_factory.build_research_agent(
+                main_prompt="You are a test assistant.",
+                researcher_prompt="Research this.",
+                critic_prompt="Critique this.",
+            )
 
     kwargs = mock_cda.call_args.kwargs
     assert agent is fake_agent

@@ -38,10 +38,12 @@ def test_error_default_recoverable_false():
 def test_stream_end_carries_final_report_and_usage():
     from app.streaming.events import stream_end
 
-    ev = stream_end("# report", {"input_tokens": 100})
+    versions = {"main": "v1", "researcher": "v1", "critic": "v1"}
+    ev = stream_end("# report", {"input_tokens": 100}, versions)
     p = json.loads(ev["data"])
     assert p["final_report"] == "# report"
     assert p["usage"] == {"input_tokens": 100}
+    assert p["versions_used"] == versions
 
 
 def test_compression_triggered_default_not_synthetic():
