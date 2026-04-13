@@ -127,7 +127,5 @@ class PromptRegistry:
 
 # Module-level singleton — import and use directly in application code.
 # Path resolution: chat-agents/apps/api/app/services/prompt_registry.py
-#   parents[0] = services/  parents[1] = app/  parents[2] = api/
-#   parents[3] = apps/      parents[4] = chat-agents/  (repo root)
-# NOTE: The design spec §4.2 incorrectly shows parents[3]; parents[4] is correct.
-registry = PromptRegistry(prompts_dir=Path(__file__).parents[4] / "prompts")
+#   parents[0] = services/  parents[1] = app/  parents[2] = api/  (prompts/ lives here)
+registry = PromptRegistry(prompts_dir=Path(__file__).parents[2] / "prompts")
