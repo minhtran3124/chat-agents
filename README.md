@@ -9,6 +9,20 @@ Demo project showcasing the **5 built-in capabilities** of [LangChain Deep Agent
 
 Each capability is **observable on a live dashboard** rather than buried in logs.
 
+## Screenshots
+
+**Research in progress** — plan forms, researchers spawn, and the report streams in real time:
+
+![Streaming research](./docs/screenshots/streaming.png)
+
+**Virtual filesystem** — researchers save raw results to VFS as they dig in:
+
+![Files sidebar](./docs/screenshots/files.png)
+
+**Completed report** — full markdown brief with citations, all panels populated:
+
+![Completed report](./docs/screenshots/completed.png)
+
 ## Repository Layout
 
 ```
