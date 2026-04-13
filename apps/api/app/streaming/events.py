@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -8,10 +8,13 @@ def _sse(event: str, data: dict) -> dict:
 
 
 def stream_start(thread_id: str) -> dict:
-    return _sse("stream_start", {
-        "thread_id": thread_id,
-        "started_at": datetime.now(timezone.utc).isoformat(),
-    })
+    return _sse(
+        "stream_start",
+        {
+            "thread_id": thread_id,
+            "started_at": datetime.now(UTC).isoformat(),
+        },
+    )
 
 
 def todo_updated(items: list[dict]) -> dict:
@@ -19,9 +22,14 @@ def todo_updated(items: list[dict]) -> dict:
 
 
 def file_saved(path: str, size_tokens: int, preview: str) -> dict:
-    return _sse("file_saved", {
-        "path": path, "size_tokens": size_tokens, "preview": preview[:500],
-    })
+    return _sse(
+        "file_saved",
+        {
+            "path": path,
+            "size_tokens": size_tokens,
+            "preview": preview[:500],
+        },
+    )
 
 
 def subagent_started(run_id: str, name: str, task: str) -> dict:
@@ -37,11 +45,14 @@ def compression_triggered(
     compressed_tokens: int,
     synthetic: bool = False,
 ) -> dict:
-    return _sse("compression_triggered", {
-        "original_tokens": original_tokens,
-        "compressed_tokens": compressed_tokens,
-        "synthetic": synthetic,
-    })
+    return _sse(
+        "compression_triggered",
+        {
+            "original_tokens": original_tokens,
+            "compressed_tokens": compressed_tokens,
+            "synthetic": synthetic,
+        },
+    )
 
 
 def text_delta(content: str) -> dict:

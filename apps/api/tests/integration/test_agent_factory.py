@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 @pytest.mark.asyncio
@@ -9,6 +10,7 @@ async def test_build_research_agent_wires_subagents_and_store(monkeypatch):
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
 
     from importlib import reload
+
     from app.config import settings as cfg
 
     reload(cfg)

@@ -1,4 +1,5 @@
 import json
+
 import pytest
 
 
@@ -44,9 +45,7 @@ async def test_subagent_node_emits_started_then_completed():
     from app.streaming.chunk_mapper import ChunkMapper
 
     mapper = ChunkMapper()
-    started = [
-        ev async for ev in mapper.process("updates", {"researcher": {"task": "Research X"}})
-    ]
+    started = [ev async for ev in mapper.process("updates", {"researcher": {"task": "Research X"}})]
     assert started[0]["event"] == "subagent_started"
     completed = [
         ev
@@ -104,12 +103,7 @@ async def test_text_delta_only_after_report_phase():
     # Critic starts first (adds it to active subagents)
     [ev async for ev in mapper.process("updates", {"critic": {"task": "review draft"}})]
     # Critic completes → report_phase = True
-    [
-        ev
-        async for ev in mapper.process(
-            "updates", {"critic": {"summary": "ok", "__end__": True}}
-        )
-    ]
+    [ev async for ev in mapper.process("updates", {"critic": {"summary": "ok", "__end__": True}})]
 
     # Now text_delta flows
     post = [ev async for ev in mapper.process("messages", (msg, {}))]
