@@ -15,6 +15,7 @@ def get_llm() -> Any:
     return init_chat_model(
         model=settings.LLM_MODEL,
         model_provider=settings.LLM_PROVIDER,
+        streaming=True,
     )
 
 
@@ -22,4 +23,5 @@ def get_fast_llm() -> Any:
     return init_chat_model(
         model=_FAST_MODEL[settings.LLM_PROVIDER],
         model_provider=settings.LLM_PROVIDER,
+        streaming=True,
     )

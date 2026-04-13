@@ -88,23 +88,28 @@ async def test_token_drop_below_70_pct_triggers_compression():
 
 
 @pytest.mark.asyncio
-async def test_text_delta_only_after_report_phase():
+async def test_non_string_file_content_does_not_crash():
+    """Regression: deepagents may store file payloads as dicts/lists.
+    tiktoken.encode() throws 'expected string or buffer' on non-strings —
+    the mapper must coerce instead of propagating the TypeError."""
+    from app.streaming.chunk_mapper import ChunkMapper
+
+    mapper = ChunkMapper()
+    chunk = {"main": {"files": {"vfs://draft.md": {"content": "hi", "v": 1}}}}
+    events = [ev async for ev in mapper.process("updates", chunk)]
+    assert len(events) == 1
+    assert events[0]["event"] == "file_saved"
+
+
+@pytest.mark.asyncio
+async def test_text_delta_always_emitted():
     from langchain_core.messages import AIMessageChunk
 
     from app.streaming.chunk_mapper import ChunkMapper
 
     mapper = ChunkMapper()
 
-    # Before critic completes, no text_delta
+    # text_delta is emitted immediately — no phase gate
     msg = AIMessageChunk(content="hi")
-    pre = [ev async for ev in mapper.process("messages", (msg, {}))]
-    assert pre == []
-
-    # Critic starts first (adds it to active subagents)
-    [ev async for ev in mapper.process("updates", {"critic": {"task": "review draft"}})]
-    # Critic completes → report_phase = True
-    [ev async for ev in mapper.process("updates", {"critic": {"summary": "ok", "__end__": True}})]
-
-    # Now text_delta flows
-    post = [ev async for ev in mapper.process("messages", (msg, {}))]
-    assert any(ev["event"] == "text_delta" for ev in post)
+    evts = [ev async for ev in mapper.process("messages", (msg, {}))]
+    assert any(ev["event"] == "text_delta" for ev in evts)

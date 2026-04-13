@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -7,6 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import settings
 from app.routers import research as research_router
 from app.stores.memory_store import lifespan_stores
+
+logging.basicConfig(
+    level=settings.LOG_LEVEL.upper(),
+    format="%(levelname)-8s %(name)s — %(message)s",
+)
 
 
 @asynccontextmanager

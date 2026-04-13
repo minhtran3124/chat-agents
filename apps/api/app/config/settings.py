@@ -1,3 +1,4 @@
+import os
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -26,6 +27,8 @@ class Settings(BaseSettings):
     VFS_OFFLOAD_THRESHOLD_TOKENS: int = 20_000
     COMPRESSION_DETECTION_RATIO: float = 0.7
 
+    LOG_LEVEL: str = "INFO"
+
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
     @model_validator(mode="after")
@@ -43,6 +46,19 @@ class Settings(BaseSettings):
                 f"LLM_PROVIDER={self.LLM_PROVIDER} but "
                 f"{self.LLM_PROVIDER.upper()}_API_KEY is missing"
             )
+        # Export keys to os.environ so third-party libs (openai, anthropic, google)
+        # can find them — pydantic-settings reads .env into the model but does NOT
+        # set os.environ automatically.
+        _env_keys = {
+            "anthropic": ("ANTHROPIC_API_KEY", self.ANTHROPIC_API_KEY),
+            "openai": ("OPENAI_API_KEY", self.OPENAI_API_KEY),
+            "google": ("GOOGLE_API_KEY", self.GOOGLE_API_KEY),
+        }
+        for env_name, value in _env_keys.values():
+            if value:
+                os.environ.setdefault(env_name, value)
+        if self.TAVILY_API_KEY:
+            os.environ.setdefault("TAVILY_API_KEY", self.TAVILY_API_KEY)
         return self
 
 
