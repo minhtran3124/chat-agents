@@ -39,6 +39,7 @@ def _parse_sse(text: str) -> list[dict]:
     return events
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_stream_end_contains_versions_used():
     """versions_used from registry.resolve_versions() must appear in stream_end."""
@@ -62,10 +63,12 @@ async def test_stream_end_contains_versions_used():
 
     assert response.status_code == 200
     events = _parse_sse(response.text)
-    stream_end_ev = next(e for e in events if e.get("event") == "stream_end")
+    stream_end_ev = next((e for e in events if e.get("event") == "stream_end"), None)
+    assert stream_end_ev is not None, f"stream_end event not found in: {events}"
     assert stream_end_ev["data"]["versions_used"] == mock_versions
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_per_request_override_takes_precedence():
     """prompt_versions in the request must override active.yaml defaults."""
@@ -98,6 +101,8 @@ async def test_per_request_override_takes_precedence():
     mock_registry.get.assert_any_call("critic", version="v1")
     # stream_end carries the merged versions
     events = _parse_sse(response.text)
-    stream_end_ev = next(e for e in events if e.get("event") == "stream_end")
+    stream_end_ev = next((e for e in events if e.get("event") == "stream_end"), None)
+    assert stream_end_ev is not None, f"stream_end event not found in: {events}"
     assert stream_end_ev["data"]["versions_used"]["main"] == "v2"
     assert stream_end_ev["data"]["versions_used"]["researcher"] == "v1"
+    assert stream_end_ev["data"]["versions_used"]["critic"] == "v1"
