@@ -46,4 +46,4 @@ class Settings(BaseSettings):
         return self
 
 
-settings = Settings()  # NOTE: do not import this in unit tests — they construct fresh Settings()
+settings = Settings()  # type: ignore[call-arg]  # NOTE: do not import this in unit tests — they construct fresh Settings()

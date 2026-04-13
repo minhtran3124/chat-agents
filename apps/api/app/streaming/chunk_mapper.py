@@ -1,5 +1,6 @@
 import uuid
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 import tiktoken
 
@@ -45,8 +46,9 @@ class ChunkMapper:
                 yield ev
         elif mode == "messages":
             msg_chunk, _meta = chunk
-            if self._report_phase and getattr(msg_chunk, "content", ""):
-                yield events.text_delta(msg_chunk.content)
+            content: str = getattr(msg_chunk, "content", None) or ""
+            if self._report_phase and content:
+                yield events.text_delta(content)
         elif mode == "values":
             async for ev in self._handle_values_snapshot(chunk):
                 yield ev
@@ -76,9 +78,7 @@ class ChunkMapper:
                 if node_name not in self._active_subagents:
                     run_id = _new_id()
                     self._active_subagents[node_name] = run_id
-                    yield events.subagent_started(
-                        run_id, node_name, update.get("task", "")
-                    )
+                    yield events.subagent_started(run_id, node_name, update.get("task", ""))
                 elif update.get("__end__") or update.get("summary"):
                     run_id = self._active_subagents.pop(node_name)
                     yield events.subagent_completed(run_id, update.get("summary", ""))

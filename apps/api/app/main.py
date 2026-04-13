@@ -1,14 +1,16 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
+from app.routers import research as research_router
 from app.stores.memory_store import lifespan_stores
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     async with lifespan_stores():
         yield
 
@@ -22,6 +24,9 @@ app.add_middleware(
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+
+app.include_router(research_router.router)
 
 
 @app.get("/health")

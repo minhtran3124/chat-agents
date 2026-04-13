@@ -1,3 +1,5 @@
+from typing import Any
+
 from deepagents import SubAgent, create_deep_agent
 
 from app.services.llm_factory import get_fast_llm, get_llm
@@ -32,7 +34,7 @@ MAIN_PROMPT = """You are an expert research assistant. Given a research question
 Always cite sources inline as [1], [2], … with a References section at the end."""
 
 
-def build_research_agent():
+def build_research_agent() -> Any:
     main_llm = get_llm()
     fast_llm = get_fast_llm()
 

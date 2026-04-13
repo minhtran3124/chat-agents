@@ -1,5 +1,6 @@
+from typing import Any
+
 from langchain.chat_models import init_chat_model
-from langchain_core.language_models import BaseChatModel
 
 from app.config.settings import settings
 
@@ -10,14 +11,14 @@ _FAST_MODEL = {
 }
 
 
-def get_llm() -> BaseChatModel:
+def get_llm() -> Any:
     return init_chat_model(
         model=settings.LLM_MODEL,
         model_provider=settings.LLM_PROVIDER,
     )
 
 
-def get_fast_llm() -> BaseChatModel:
+def get_fast_llm() -> Any:
     return init_chat_model(
         model=_FAST_MODEL[settings.LLM_PROVIDER],
         model_provider=settings.LLM_PROVIDER,
