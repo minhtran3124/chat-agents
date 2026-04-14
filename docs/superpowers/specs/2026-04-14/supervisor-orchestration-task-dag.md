@@ -44,7 +44,7 @@ grep -c '^- \[ \]' "$DAG"
 | :-- | :-------------------------------- | :--: | :--: | :---------: | :--: | :----------------- | :--------- |
 | T1  | ModelRegistry                     |  1   | [ ]  | [ ]         | [x]  | Coder-A            | 0675991    |
 | T2  | ToolRegistry                      |  1   | [ ]  | [ ]         | [x]  | Coder-B            | 7a15999    |
-| T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]  | [x]         | [ ]  | Coder-D            | —          |
+| T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]  | [ ]         | [x]  | Coder-D            | ceb6af8    |
 | T5  | Classifier                        |  1   | [ ]  | [x]         | [ ]  | Coder-C            | —          |
 | T9  | Shared runner + SSE event factory |  1   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
 | T4  | Tools                             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
@@ -89,13 +89,13 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 2.7 Commit — `feat(api): add ToolRegistry with decorator auto-registration`
 
 #### T3 — AgentSpec + REGISTERED_SPECS (Wave 1)
-- [ ] 3.1 Write failing test — spec declarations + integrity
-- [ ] 3.2 Run test — expect FAIL
-- [ ] 3.3 Implement `app/agents/specs.py` + `REGISTERED_SPECS`
-- [ ] 3.4 Run tests — expect 5 passed
-- [ ] 3.5 Lint + type-check
-- [ ] 3.6 Full suite green
-- [ ] 3.7 Commit — `feat(api): add AgentSpec and REGISTERED_SPECS for six specialists`
+- [x] 3.1 Write failing test — spec declarations + integrity
+- [x] 3.2 Run test — expect FAIL
+- [x] 3.3 Implement `app/agents/specs.py` + `REGISTERED_SPECS`
+- [x] 3.4 Run tests — expect 5 passed
+- [x] 3.5 Lint + type-check
+- [x] 3.6 Full suite green
+- [x] 3.7 Commit — `feat(api): add AgentSpec and REGISTERED_SPECS for six specialists`
 
 #### T5 — Classifier (Wave 1)
 - [ ] 5.1 Create `prompts/classifier/v1.md`
