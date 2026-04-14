@@ -51,7 +51,7 @@ grep -c '^- \[ \]' "$DAG"
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [ ]         | [x]  | Coder-D            | eb3b771    |
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
 | T8  | Supervisor graph + bypass graph   |  3   | [ ]  | [ ]         | [x]  | Coder-E            | 588a149    |
-| T10 | Routers + /chat + /research + FE  |  4   | [ ]  | [x]         | [ ]  | Coder-A            | —          |
+| T10 | Routers + /chat + /research + FE  |  4   | [ ]  | [ ]         | [x]  | Coder-A            | 49bb824    |
 | T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
 
 ### Wave Gate Checklist — orchestrator flips these when a wave fully lands
@@ -165,20 +165,20 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 8.6 Commit — `feat(api): add supervisor graph wiring classifier and six specialists`
 
 #### T10 — Routers + `/chat` + `/research` refactor + SSE + frontend (Wave 4, after T4, T8, T9)
-- [ ] 10.1 Add `app/schemas/chat.py` — `ChatRequest`
-- [ ] 10.2 Implement `app/routers/chat.py` (POST `/chat` → `run_graph(force_intent=None)`)
-- [ ] 10.3 Refactor `app/routers/research.py` (→ `run_graph(force_intent="deep-research")`)
-- [ ] 10.4 Rewrite `app/main.py` lifespan (build registries, both graphs, register both routers)
-- [ ] 10.5 Integration test — `/chat` with `chat` intent SSE happy path
-- [ ] 10.6 Update `test_research_endpoint.py` to assert `intent_classified` event
-- [ ] 10.7 Run backend tests — all PASS
-- [ ] 10.8 Frontend — extend `SSEEventMap` in `lib/types.ts`
-- [ ] 10.9 Frontend — add `routedIntent` + `intent_classified` handler in `useResearchStream.ts`
-- [ ] 10.10 Frontend — create `RoutedIntentBadge.tsx` + render in `research/page.tsx`
-- [ ] 10.11 Frontend — add vitest for hook handling the new event
-- [ ] 10.12 Run frontend tests + lint (`npm test -- --run && npm run lint`)
-- [ ] 10.13 Smoke-test end-to-end manually (optional; requires real API keys)
-- [ ] 10.14 Commit — `feat(api,web): add /chat router, refactor /research bypass, wire intent_classified SSE`
+- [x] 10.1 Add `app/schemas/chat.py` — `ChatRequest`
+- [x] 10.2 Implement `app/routers/chat.py` (POST `/chat` → `run_graph(force_intent=None)`)
+- [x] 10.3 Refactor `app/routers/research.py` (→ `run_graph(force_intent="deep-research")`)
+- [x] 10.4 Rewrite `app/main.py` lifespan (build registries, both graphs, register both routers)
+- [x] 10.5 Integration test — `/chat` with `chat` intent SSE happy path
+- [x] 10.6 Update `test_research_endpoint.py` to assert `intent_classified` event
+- [x] 10.7 Run backend tests — all PASS
+- [x] 10.8 Frontend — extend `SSEEventMap` in `lib/types.ts`
+- [x] 10.9 Frontend — add `routedIntent` + `intent_classified` handler in `useResearchStream.ts`
+- [x] 10.10 Frontend — create `RoutedIntentBadge.tsx` + render in `research/page.tsx`
+- [x] 10.11 Frontend — add vitest for hook handling the new event
+- [x] 10.12 Run frontend tests + lint (`npm test -- --run && npm run lint`)
+- [x] 10.13 Smoke-test end-to-end manually (optional; requires real API keys)
+- [x] 10.14 Commit — `feat(api,web): add /chat router, refactor /research bypass, wire intent_classified SSE`
 
 #### T11 — Cleanup (Wave 5, after T10)
 - [ ] 11.1 `grep` for callers of `llm_factory`, `search_tool`, `agent_factory`
