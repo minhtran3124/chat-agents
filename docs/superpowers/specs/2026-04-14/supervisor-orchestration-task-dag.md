@@ -52,7 +52,7 @@ grep -c '^- \[ \]' "$DAG"
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
 | T8  | Supervisor graph + bypass graph   |  3   | [ ]  | [ ]         | [x]  | Coder-E            | 588a149    |
 | T10 | Routers + /chat + /research + FE  |  4   | [ ]  | [ ]         | [x]  | Coder-A            | 49bb824    |
-| T11 | Cleanup (delete legacy)           |  5   | [ ]  | [x]         | [ ]  | Coder-A            | —          |
+| T11 | Cleanup (delete legacy)           |  5   | [ ]  | [ ]         | [x]  | Coder-A            | 519fb82    |
 
 ### Wave Gate Checklist — orchestrator flips these when a wave fully lands
 
@@ -60,7 +60,7 @@ grep -c '^- \[ \]' "$DAG"
 - [x] **Wave 2 complete** (T4, T6, T7 all merged, green suite)
 - [x] **Wave 3 complete** (T8 merged, green suite)
 - [x] **Wave 4 complete** (T10 merged, green suite, frontend smoke test passed)
-- [ ] **Wave 5 complete** (T11 merged, final lint + type-check + full test suite green)
+- [x] **Wave 5 complete** (T11 merged, final lint + type-check + full test suite green)
 
 ### Per-Task Sub-Step Checklists
 
@@ -181,12 +181,12 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 10.14 Commit — `feat(api,web): add /chat router, refactor /research bypass, wire intent_classified SSE`
 
 #### T11 — Cleanup (Wave 5, after T10)
-- [ ] 11.1 `grep` for callers of `llm_factory`, `search_tool`, `agent_factory`
-- [ ] 11.2 Delete `app/services/llm_factory.py`
-- [ ] 11.3 Delete `app/services/search_tool.py`
-- [ ] 11.4 Decide on `app/services/agent_factory.py` — delete or leave as documented shim
-- [ ] 11.5 Full gauntlet green (pytest + ruff + mypy + web lint + tsc)
-- [ ] 11.6 Commit — `chore(api): remove legacy llm_factory, search_tool, and agent_factory`
+- [x] 11.1 `grep` for callers of `llm_factory`, `search_tool`, `agent_factory`
+- [x] 11.2 Delete `app/services/llm_factory.py`
+- [x] 11.3 Delete `app/services/search_tool.py`
+- [x] 11.4 Decide on `app/services/agent_factory.py` — delete or leave as documented shim
+- [x] 11.5 Full gauntlet green (pytest + ruff + mypy + web lint + tsc)
+- [x] 11.6 Commit — `chore(api): remove legacy llm_factory, search_tool, and agent_factory`
 
 ---
 
