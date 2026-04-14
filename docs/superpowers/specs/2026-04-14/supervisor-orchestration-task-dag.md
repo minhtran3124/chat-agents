@@ -45,7 +45,7 @@ grep -c '^- \[ \]' "$DAG"
 | T1  | ModelRegistry                     |  1   | [ ]  | [ ]         | [x]  | Coder-A            | 0675991    |
 | T2  | ToolRegistry                      |  1   | [ ]  | [ ]         | [x]  | Coder-B            | 7a15999    |
 | T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]  | [ ]         | [x]  | Coder-D            | ceb6af8    |
-| T5  | Classifier                        |  1   | [ ]  | [x]         | [ ]  | Coder-C            | —          |
+| T5  | Classifier                        |  1   | [ ]  | [ ]         | [x]  | Coder-C            | 2c5be69    |
 | T9  | Shared runner + SSE event factory |  1   | [ ]  | [ ]         | [x]  | Coder-E            | 22e093b    |
 | T4  | Tools                             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T6  | ReAct builder + refined prompts   |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
@@ -98,19 +98,19 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 3.7 Commit — `feat(api): add AgentSpec and REGISTERED_SPECS for six specialists`
 
 #### T5 — Classifier (Wave 1)
-- [ ] 5.1 Create `prompts/classifier/v1.md`
-- [ ] 5.2 Register classifier + 5 specialists in `prompts/active.yaml`
-- [ ] 5.3 Create placeholder prompts (chat/research/summarize/code/planner)
-- [ ] 5.4 Write failing test — `ClassifierResult` schema path
-- [ ] 5.5 Run test — expect FAIL
-- [ ] 5.6 Implement `schemas/routing.py` (`ClassifierResult`, `RoutingEvent`)
-- [ ] 5.7 Implement `app/agents/classifier.py` with `classify(...)`
-- [ ] 5.8 Run tests — expect 2 passed
-- [ ] 5.9 Add low-confidence + stickiness tests
-- [ ] 5.10 Run tests — expect 4 passed
-- [ ] 5.11 Lint + type-check
-- [ ] 5.12 Full suite green (PromptRegistry loads all prompts)
-- [ ] 5.13 Commit — `feat(api): add classifier node with structured output and stickiness`
+- [x] 5.1 Create `prompts/classifier/v1.md`
+- [x] 5.2 Register classifier + 5 specialists in `prompts/active.yaml`
+- [x] 5.3 Create placeholder prompts (chat/research/summarize/code/planner)
+- [x] 5.4 Write failing test — `ClassifierResult` schema path
+- [x] 5.5 Run test — expect FAIL
+- [x] 5.6 Implement `schemas/routing.py` (`ClassifierResult`, `RoutingEvent`)
+- [x] 5.7 Implement `app/agents/classifier.py` with `classify(...)`
+- [x] 5.8 Run tests — expect 2 passed
+- [x] 5.9 Add low-confidence + stickiness tests
+- [x] 5.10 Run tests — expect 4 passed
+- [x] 5.11 Lint + type-check
+- [x] 5.12 Full suite green (PromptRegistry loads all prompts)
+- [x] 5.13 Commit — `feat(api): add classifier node with structured output and stickiness`
 
 #### T9 — Shared runner + SSE event factory (Wave 1)
 - [x] 9.1 Write failing test — runner emits expected event sequence
