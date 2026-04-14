@@ -14,7 +14,7 @@ _DEFAULT_MODEL = {
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    LLM_PROVIDER: Literal["anthropic", "openai", "google"] = "anthropic"
+    LLM_PROVIDER: Literal["openai", "anthropic", "google"] = "openai"  # was "anthropic"
     LLM_MODEL: str | None = None
 
     ANTHROPIC_API_KEY: str | None = None

@@ -1,0 +1,22 @@
+# apps/api/models.yaml
+# Primary provider: OpenAI. Swap a role by editing this file
+# or by setting <ROLE>_MODEL / <ROLE>_PROVIDER env vars.
+
+classifier:
+  provider: openai
+  model: gpt-4o-mini
+  temperature: 0.0
+  streaming: false
+  response_format: json_schema
+
+fast:
+  provider: openai
+  model: gpt-4o-mini
+  temperature: 0.3
+  streaming: true
+
+main:
+  provider: openai
+  model: gpt-4o
+  temperature: 0.7
+  streaming: true

@@ -67,17 +67,17 @@ grep -c '^- \[ \]' "$DAG"
 Each task's owning agent ticks these as it executes the TDD micro-steps from the source plan. Short titles only — consult the plan for code snippets and exact commands.
 
 #### T1 — ModelRegistry (Wave 1)
-- [ ] 1.1 Create `apps/api/models.yaml` with OpenAI defaults
-- [ ] 1.2 Write failing test — YAML load + `get()`
-- [ ] 1.3 Run test — expect FAIL (ModuleNotFoundError)
-- [ ] 1.4 Implement `app/models/__init__.py` + `registry.py` minimal
-- [ ] 1.5 Run test — expect PASS
-- [ ] 1.6 Add env-override + unknown-role + required_providers tests
-- [ ] 1.7 Run tests — expect 4 passed
-- [ ] 1.8 Update Settings default provider to `openai`
-- [ ] 1.9 Lint + type-check (ruff + mypy)
-- [ ] 1.10 Full suite green (`pytest -x`)
-- [ ] 1.11 Commit — `feat(api): add ModelRegistry with YAML config and env overrides`
+- [x] 1.1 Create `apps/api/models.yaml` with OpenAI defaults
+- [x] 1.2 Write failing test — YAML load + `get()`
+- [x] 1.3 Run test — expect FAIL (ModuleNotFoundError)
+- [x] 1.4 Implement `app/models/__init__.py` + `registry.py` minimal
+- [x] 1.5 Run test — expect PASS
+- [x] 1.6 Add env-override + unknown-role + required_providers tests
+- [x] 1.7 Run tests — expect 4 passed
+- [x] 1.8 Update Settings default provider to `openai`
+- [x] 1.9 Lint + type-check (ruff + mypy)
+- [x] 1.10 Full suite green (`pytest -x`)
+- [x] 1.11 Commit — `feat(api): add ModelRegistry with YAML config and env overrides`
 
 #### T2 — ToolRegistry (Wave 1)
 - [ ] 2.1 Write failing test — `@register_tool` decorator
