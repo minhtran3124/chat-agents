@@ -46,7 +46,7 @@ grep -c '^- \[ \]' "$DAG"
 | T2  | ToolRegistry                      |  1   | [ ]  | [x]         | [ ]  | Coder-B            | —          |
 | T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]  | [x]         | [ ]  | Coder-D            | —          |
 | T5  | Classifier                        |  1   | [ ]  | [x]         | [ ]  | Coder-C            | —          |
-| T9  | Shared runner + SSE event factory |  1   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T9  | Shared runner + SSE event factory |  1   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
 | T4  | Tools                             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T6  | ReAct builder + refined prompts   |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T7  | Deep-research builder             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
