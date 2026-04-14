@@ -46,7 +46,7 @@ grep -c '^- \[ \]' "$DAG"
 | T2  | ToolRegistry                      |  1   | [ ]  | [ ]         | [x]  | Coder-B            | 7a15999    |
 | T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]  | [ ]         | [x]  | Coder-D            | ceb6af8    |
 | T5  | Classifier                        |  1   | [ ]  | [x]         | [ ]  | Coder-C            | —          |
-| T9  | Shared runner + SSE event factory |  1   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
+| T9  | Shared runner + SSE event factory |  1   | [ ]  | [ ]         | [x]  | Coder-E            | 22e093b    |
 | T4  | Tools                             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T6  | ReAct builder + refined prompts   |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T7  | Deep-research builder             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
@@ -113,13 +113,13 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [ ] 5.13 Commit — `feat(api): add classifier node with structured output and stickiness`
 
 #### T9 — Shared runner + SSE event factory (Wave 1)
-- [ ] 9.1 Write failing test — runner emits expected event sequence
-- [ ] 9.2 Run test — expect FAIL
-- [ ] 9.3 Implement `app/routers/_runner.py::run_graph(...)`
-- [ ] 9.4 Add `intent_classified(...)` factory to `streaming/events.py`
-- [ ] 9.5 Run runner test — expect PASS
-- [ ] 9.6 Lint + type-check + full suite
-- [ ] 9.7 Commit — `feat(api): add shared graph runner with intent_classified SSE event`
+- [x] 9.1 Write failing test — runner emits expected event sequence
+- [x] 9.2 Run test — expect FAIL
+- [x] 9.3 Implement `app/routers/_runner.py::run_graph(...)`
+- [x] 9.4 Add `intent_classified(...)` factory to `streaming/events.py`
+- [x] 9.5 Run runner test — expect PASS
+- [x] 9.6 Lint + type-check + full suite
+- [x] 9.7 Commit — `feat(api): add shared graph runner with intent_classified SSE event`
 
 #### T4 — Tools: web_search, fetch_url, repo_search (Wave 2, after T2)
 - [ ] 4.1 Create `app/tools/web_search.py` (register + error-wrap)
