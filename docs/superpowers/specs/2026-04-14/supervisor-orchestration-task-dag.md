@@ -49,7 +49,7 @@ grep -c '^- \[ \]' "$DAG"
 | T9  | Shared runner + SSE event factory |  1   | [ ]  | [ ]         | [x]  | Coder-E            | 22e093b    |
 | T4  | Tools                             |  2   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [x]         | [ ]  | Coder-D            | —          |
-| T7  | Deep-research builder             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T7  | Deep-research builder             |  2   | [ ]  | [x]         | [ ]  | Coder-C            | —          |
 | T8  | Supervisor graph + bypass graph   |  3   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
