@@ -50,7 +50,7 @@ grep -c '^- \[ \]' "$DAG"
 | T4  | Tools                             |  2   | [ ]  | [ ]         | [x]  | Coder-E            | 7e7527c    |
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [ ]         | [x]  | Coder-D            | eb3b771    |
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
-| T8  | Supervisor graph + bypass graph   |  3   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
+| T8  | Supervisor graph + bypass graph   |  3   | [ ]  | [ ]         | [x]  | Coder-E            | 588a149    |
 | T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
 
@@ -157,12 +157,12 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 7.6 Commit — `feat(api): add deep_research builder wrapping create_deep_agent`
 
 #### T8 — Supervisor graph + bypass graph (Wave 3, after T3, T5, T6, T7)
-- [ ] 8.1 Write failing integration test — graph compiles with 7 nodes
-- [ ] 8.2 Run test — expect FAIL
-- [ ] 8.3 Implement `app/agents/supervisor_graph.py` (`build_supervisor_graph` + `build_deep_research_only_graph`)
-- [ ] 8.4 Run test — expect PASS
-- [ ] 8.5 Lint + type-check + full suite
-- [ ] 8.6 Commit — `feat(api): add supervisor graph wiring classifier and six specialists`
+- [x] 8.1 Write failing integration test — graph compiles with 7 nodes
+- [x] 8.2 Run test — expect FAIL
+- [x] 8.3 Implement `app/agents/supervisor_graph.py` (`build_supervisor_graph` + `build_deep_research_only_graph`)
+- [x] 8.4 Run test — expect PASS
+- [x] 8.5 Lint + type-check + full suite
+- [x] 8.6 Commit — `feat(api): add supervisor graph wiring classifier and six specialists`
 
 #### T10 — Routers + `/chat` + `/research` refactor + SSE + frontend (Wave 4, after T4, T8, T9)
 - [ ] 10.1 Add `app/schemas/chat.py` — `ChatRequest`
