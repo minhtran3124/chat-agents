@@ -51,7 +51,7 @@ grep -c '^- \[ \]' "$DAG"
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [ ]         | [x]  | Coder-D            | eb3b771    |
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
 | T8  | Supervisor graph + bypass graph   |  3   | [ ]  | [ ]         | [x]  | Coder-E            | 588a149    |
-| T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T10 | Routers + /chat + /research + FE  |  4   | [ ]  | [x]         | [ ]  | Coder-A            | —          |
 | T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
 
 ### Wave Gate Checklist — orchestrator flips these when a wave fully lands
