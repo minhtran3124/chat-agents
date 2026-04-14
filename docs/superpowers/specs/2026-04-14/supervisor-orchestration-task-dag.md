@@ -50,7 +50,7 @@ grep -c '^- \[ \]' "$DAG"
 | T4  | Tools                             |  2   | [ ]  | [ ]         | [x]  | Coder-E            | 7e7527c    |
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [ ]         | [x]  | Coder-D            | eb3b771    |
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
-| T8  | Supervisor graph + bypass graph   |  3   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T8  | Supervisor graph + bypass graph   |  3   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
 | T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
 
