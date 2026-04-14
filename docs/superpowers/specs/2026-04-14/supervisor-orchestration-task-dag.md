@@ -49,7 +49,7 @@ grep -c '^- \[ \]' "$DAG"
 | T9  | Shared runner + SSE event factory |  1   | [ ]  | [ ]         | [x]  | Coder-E            | 22e093b    |
 | T4  | Tools                             |  2   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [x]         | [ ]  | Coder-D            | —          |
-| T7  | Deep-research builder             |  2   | [ ]  | [x]         | [ ]  | Coder-C            | —          |
+| T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
 | T8  | Supervisor graph + bypass graph   |  3   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
@@ -149,12 +149,12 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [ ] 6.8 Commit — `feat(api): add ReAct builder and refined prompts for five specialists`
 
 #### T7 — Deep-research builder (Wave 2, after T1, T2, T3)
-- [ ] 7.1 Write failing test — `build_deep_research_agent` composes subagents
-- [ ] 7.2 Run test — expect FAIL
-- [ ] 7.3 Implement `app/agents/builders/deep_research.py`
-- [ ] 7.4 Run test — expect PASS
-- [ ] 7.5 Lint + type-check + full suite
-- [ ] 7.6 Commit — `feat(api): add deep_research builder wrapping create_deep_agent`
+- [x] 7.1 Write failing test — `build_deep_research_agent` composes subagents
+- [x] 7.2 Run test — expect FAIL
+- [x] 7.3 Implement `app/agents/builders/deep_research.py`
+- [x] 7.4 Run test — expect PASS
+- [x] 7.5 Lint + type-check + full suite
+- [x] 7.6 Commit — `feat(api): add deep_research builder wrapping create_deep_agent`
 
 #### T8 — Supervisor graph + bypass graph (Wave 3, after T3, T5, T6, T7)
 - [ ] 8.1 Write failing integration test — graph compiles with 7 nodes
