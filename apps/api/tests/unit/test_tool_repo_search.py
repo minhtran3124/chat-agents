@@ -12,8 +12,7 @@ async def test_repo_search_finds_known_symbol() -> None:
 
 @pytest.mark.unit
 async def test_repo_search_empty_on_garbage() -> None:
-    # Construct pattern at runtime so the literal never appears in source
-    # (git grep would find the pattern inside this file if it were a literal).
-    pattern = "ZZZNOMATCH_" + "xk9q2v8m"
+    # Split literal so git grep cannot match the full pattern in this source file.
+    pattern = "zzz_this_should_not" + "_exist_67890"
     result = await repo_search.ainvoke({"pattern": pattern})
     assert result.get("matches") == [] or result.get("note") == "no matches"
