@@ -61,3 +61,10 @@ def test_get_many_preserves_order() -> None:
 
     names = [t.name for t in reg.get_many(["b", "a"])]
     assert names == ["b", "a"]
+
+
+@pytest.mark.unit
+def test_singleton_registers_all_initial_tools() -> None:
+    import app.tools  # noqa: F401 — triggers registration
+    from app.tools.registry import registry
+    assert {"web_search", "fetch_url", "repo_search"}.issubset(set(registry.names()))
