@@ -8,35 +8,51 @@
 
 ## Progress Tracker
 
-**How to use (agents):** tick the boxes for your own task's sub-steps as you complete them. When your chunk's commit lands, flip your row in the master checklist from `[ ]` to `[x]` and fill in the Owner + Commit SHA columns. **Never edit another agent's checklist.**
+**Concurrency model.** Multiple agents may pick tasks from the Master Checklist in parallel. The three-column lock (**Todo → In-Progress → Done**) prevents duplicate work: an agent scans for a row where `Todo = [x]` AND `In-Progress = [ ]`, then atomically claims it by moving `[x]` between columns and writing its name in the Owner column. Another agent scanning simultaneously sees the lock and skips that row.
 
-**Status legend:** `[ ]` pending · `[~]` in-progress · `[x]` done · `[!]` blocked.
+**Master Checklist workflow (per task):**
 
-**Quick progress count:**
+1. **Pick:** find a row where `Todo = [x]`, `In-Progress = [ ]`, `Done = [ ]`, and all hard dependencies (see §1) are already `Done = [x]`.
+2. **Claim** (*before* starting work): flip `Todo [x] → [ ]`, flip `In-Progress [ ] → [x]`, write your agent name in the Owner column. Commit this edit on its own (e.g. `chore(plan): claim T1`) and push immediately so other agents see the lock.
+3. **Execute:** work through the task's sub-step checklist below (`- [ ]` → `- [x]` as you finish each TDD step in the plan).
+4. **Mark done:** once your task's final code commit has landed, flip `In-Progress [x] → [ ]`, flip `Done [ ] → [x]`, and write the commit SHA in the last column. Commit this edit (e.g. `chore(plan): mark T1 done`).
+5. **Conflict?** If your claim commit is rejected by the remote (someone else claimed the same row first), abort, rebase, and pick a different task. Never contend for a task.
+
+**Status legend:**
+
+- **Master Checklist cells** — `[ ]` empty · `[x]` set. **Exactly one** of the three state columns (Todo / In-Progress / Done) is `[x]` for any given row at any time.
+- **Sub-step checklists** — `[ ]` pending · `[x]` done · `[!]` blocked (stop and escalate).
+- **Wave Gates** — orchestrator flips from `[ ]` to `[x]` when every task in the wave is `Done = [x]` and the full test suite is green.
+
+**Quick progress oracle (run any time to see where the team is):**
 
 ```bash
-# how many sub-steps still pending across all tasks?
-grep -c '^- \[ \]' docs/superpowers/specs/2026-04-14/supervisor-orchestration-task-dag.md
+DAG=docs/superpowers/specs/2026-04-14/supervisor-orchestration-task-dag.md
 
-# how many chunks fully done?
-grep -c '^| T[0-9]* |.*| \[x\] |' docs/superpowers/specs/2026-04-14/supervisor-orchestration-task-dag.md
+# master checklist — tasks by state (column padding differs, so use `+` for 1+ spaces)
+grep -cE '^\| T[0-9]+ .*\| \[x\] +\| \[ \] +\| \[ \] +\|' "$DAG"   # Todo
+grep -cE '^\| T[0-9]+ .*\| \[ \] +\| \[x\] +\| \[ \] +\|' "$DAG"   # In-Progress
+grep -cE '^\| T[0-9]+ .*\| \[ \] +\| \[ \] +\| \[x\] +\|' "$DAG"   # Done
+
+# sub-step checklists — how many TDD micro-steps still pending?
+grep -c '^- \[ \]' "$DAG"
 ```
 
 ### Master Checklist — one row per chunk
 
-| ID  | Task                              | Wave | Status | Owner (agent name) | Commit SHA |
-| :-- | :-------------------------------- | :--: | :----: | :----------------- | :--------- |
-| T1  | ModelRegistry                     |  1   | [ ]    | —                  | —          |
-| T2  | ToolRegistry                      |  1   | [ ]    | —                  | —          |
-| T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]    | —                  | —          |
-| T5  | Classifier                        |  1   | [ ]    | —                  | —          |
-| T9  | Shared runner + SSE event factory |  1   | [ ]    | —                  | —          |
-| T4  | Tools                             |  2   | [ ]    | —                  | —          |
-| T6  | ReAct builder + refined prompts   |  2   | [ ]    | —                  | —          |
-| T7  | Deep-research builder             |  2   | [ ]    | —                  | —          |
-| T8  | Supervisor graph + bypass graph   |  3   | [ ]    | —                  | —          |
-| T10 | Routers + /chat + /research + FE  |  4   | [ ]    | —                  | —          |
-| T11 | Cleanup (delete legacy)           |  5   | [ ]    | —                  | —          |
+| ID  | Task                              | Wave | Todo | In-Progress | Done | Owner (agent name) | Commit SHA |
+| :-- | :-------------------------------- | :--: | :--: | :---------: | :--: | :----------------- | :--------- |
+| T1  | ModelRegistry                     |  1   | [ ]  | [x]         | [ ]  | Coder-A            | —          |
+| T2  | ToolRegistry                      |  1   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T3  | AgentSpec + REGISTERED_SPECS      |  1   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T5  | Classifier                        |  1   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T9  | Shared runner + SSE event factory |  1   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T4  | Tools                             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T6  | ReAct builder + refined prompts   |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T7  | Deep-research builder             |  2   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T8  | Supervisor graph + bypass graph   |  3   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
+| T11 | Cleanup (delete legacy)           |  5   | [x]  | [ ]         | [ ]  | —                  | —          |
 
 ### Wave Gate Checklist — orchestrator flips these when a wave fully lands
 
