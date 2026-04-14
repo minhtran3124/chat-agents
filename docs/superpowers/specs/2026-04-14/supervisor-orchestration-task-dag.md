@@ -56,7 +56,7 @@ grep -c '^- \[ \]' "$DAG"
 
 ### Wave Gate Checklist — orchestrator flips these when a wave fully lands
 
-- [ ] **Wave 1 complete** (T1, T2, T3, T5, T9 all merged, green suite)
+- [x] **Wave 1 complete** (T1, T2, T3, T5, T9 all merged, green suite)
 - [ ] **Wave 2 complete** (T4, T6, T7 all merged, green suite)
 - [ ] **Wave 3 complete** (T8 merged, green suite)
 - [ ] **Wave 4 complete** (T10 merged, green suite, frontend smoke test passed)
