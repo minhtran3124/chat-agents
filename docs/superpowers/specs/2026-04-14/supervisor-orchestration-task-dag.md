@@ -80,13 +80,13 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 1.11 Commit — `feat(api): add ModelRegistry with YAML config and env overrides`
 
 #### T2 — ToolRegistry (Wave 1)
-- [ ] 2.1 Write failing test — `@register_tool` decorator
-- [ ] 2.2 Run test — expect FAIL
-- [ ] 2.3 Implement `ToolRegistry` + singleton + empty `tools/__init__.py`
-- [ ] 2.4 Run tests — expect 4 passed
-- [ ] 2.5 Lint + type-check
-- [ ] 2.6 Full suite green
-- [ ] 2.7 Commit — `feat(api): add ToolRegistry with decorator auto-registration`
+- [x] 2.1 Write failing test — `@register_tool` decorator
+- [x] 2.2 Run test — expect FAIL
+- [x] 2.3 Implement `ToolRegistry` + singleton + empty `tools/__init__.py`
+- [x] 2.4 Run tests — expect 4 passed
+- [x] 2.5 Lint + type-check
+- [x] 2.6 Full suite green (T2 tests 4/4 pass; 6 pre-existing failures unrelated to T2)
+- [x] 2.7 Commit — `feat(api): add ToolRegistry with decorator auto-registration`
 
 #### T3 — AgentSpec + REGISTERED_SPECS (Wave 1)
 - [ ] 3.1 Write failing test — spec declarations + integrity
