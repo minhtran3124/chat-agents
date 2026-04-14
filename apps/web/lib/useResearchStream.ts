@@ -16,6 +16,7 @@ export type ResearchState = {
   status: "idle" | "loading" | "streaming" | "done" | "error";
   question?: string;
   error?: string;
+  routedIntent: string | null;
 };
 
 export const initial: ResearchState = {
@@ -25,6 +26,7 @@ export const initial: ResearchState = {
   compressions: [],
   report: "",
   status: "idle",
+  routedIntent: null,
 };
 
 export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
@@ -56,6 +58,8 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
       };
     case "compression_triggered":
       return { ...state, compressions: [...state.compressions, data] };
+    case "intent_classified":
+      return { ...state, routedIntent: data.intent };
     case "text_delta":
       return { ...state, report: state.report + data.content };
     case "error":

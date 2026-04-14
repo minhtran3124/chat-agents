@@ -107,4 +107,34 @@ describe("research reducer", () => {
     const s = reducer(initial, { event: "unknown_xyz", data: {} } as any);
     expect(s).toBe(initial);
   });
+
+  it("intent_classified sets routedIntent", () => {
+    const s = reducer(initial, {
+      event: "intent_classified",
+      data: { intent: "deep-research", confidence: 1.0, fallback_used: false },
+    });
+    expect(s.routedIntent).toBe("deep-research");
+  });
+
+  it("intent_classified updates routedIntent on second event", () => {
+    let s = reducer(initial, {
+      event: "intent_classified",
+      data: { intent: "chat", confidence: 0.9, fallback_used: false },
+    });
+    expect(s.routedIntent).toBe("chat");
+    s = reducer(s, {
+      event: "intent_classified",
+      data: { intent: "research", confidence: 0.8, fallback_used: false },
+    });
+    expect(s.routedIntent).toBe("research");
+  });
+
+  it("stream_start resets routedIntent to null", () => {
+    const withIntent = { ...initial, routedIntent: "chat" };
+    const s = reducer(withIntent, {
+      event: "stream_start",
+      data: { thread_id: "t", started_at: "now" },
+    });
+    expect(s.routedIntent).toBeNull();
+  });
 });

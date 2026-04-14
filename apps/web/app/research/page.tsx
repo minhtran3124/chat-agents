@@ -6,6 +6,7 @@ import { TodoList } from "./components/TodoList";
 import { FileList } from "./components/FileList";
 import { SubagentPanel } from "./components/SubagentPanel";
 import { ReportView } from "./components/ReportView";
+import { RoutedIntentBadge } from "./components/RoutedIntentBadge";
 import { StatusBadge } from "./components/StatusBadge";
 import { ToastStack, ToastItem } from "./components/SubagentToast";
 import { AskedCard } from "./components/AskedCard";
@@ -60,6 +61,7 @@ export default function ResearchPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <RoutedIntentBadge intent={state.routedIntent} />
           {state.status !== "idle" && (
             <button
               onClick={reset}

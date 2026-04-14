@@ -25,4 +25,5 @@ export type SSEEventMap = {
   memory_updated: { namespace: string; key: string };
   error: { message: string; recoverable: boolean };
   stream_end: { final_report: string; usage: Record<string, unknown>; versions_used: Record<string, string> };
+  intent_classified: { intent: string; confidence: number; fallback_used: boolean };
 };
