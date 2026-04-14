@@ -80,3 +80,14 @@ def stream_end(
             "versions_used": versions_used,
         },
     )
+
+
+def intent_classified(intent: str, confidence: float, fallback_used: bool) -> dict:
+    return _sse(
+        "intent_classified",
+        {
+            "intent": intent,
+            "confidence": confidence,
+            "fallback_used": fallback_used,
+        },
+    )
