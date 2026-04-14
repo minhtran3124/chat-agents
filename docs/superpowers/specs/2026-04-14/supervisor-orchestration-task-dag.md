@@ -47,7 +47,7 @@ grep -c '^- \[ \]' "$DAG"
 | T3  | AgentSpec + REGISTERED_SPECS      |  1   | [ ]  | [ ]         | [x]  | Coder-D            | ceb6af8    |
 | T5  | Classifier                        |  1   | [ ]  | [ ]         | [x]  | Coder-C            | 2c5be69    |
 | T9  | Shared runner + SSE event factory |  1   | [ ]  | [ ]         | [x]  | Coder-E            | 22e093b    |
-| T4  | Tools                             |  2   | [ ]  | [x]         | [ ]  | Coder-E            | —          |
+| T4  | Tools                             |  2   | [ ]  | [ ]         | [x]  | Coder-E            | 7e7527c    |
 | T6  | ReAct builder + refined prompts   |  2   | [ ]  | [x]         | [ ]  | Coder-D            | —          |
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
 | T8  | Supervisor graph + bypass graph   |  3   | [x]  | [ ]         | [ ]  | —                  | —          |
@@ -122,21 +122,21 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 9.7 Commit — `feat(api): add shared graph runner with intent_classified SSE event`
 
 #### T4 — Tools: web_search, fetch_url, repo_search (Wave 2, after T2)
-- [ ] 4.1 Create `app/tools/web_search.py` (register + error-wrap)
-- [ ] 4.2 Write test for `web_search` (returns results, wraps exceptions)
-- [ ] 4.3 Add `web_search` import to `app/tools/__init__.py`
-- [ ] 4.4 Run web_search tests — expect 2 passed
-- [ ] 4.5 Create `app/tools/fetch_url.py` (httpx.AsyncClient, 10s timeout, 50KB cap)
-- [ ] 4.6 Test `fetch_url` (body + error-on-exception)
-- [ ] 4.7 Add `fetch_url` import to `__init__.py`
-- [ ] 4.8 Run fetch_url tests — expect 2 passed
-- [ ] 4.9 Create `app/tools/repo_search.py` (`git grep` subprocess, 5s timeout)
-- [ ] 4.10 Test `repo_search` (finds known symbol; empty on garbage)
-- [ ] 4.11 Add `repo_search` import to `__init__.py`
-- [ ] 4.12 Run repo_search tests — expect 2 passed
-- [ ] 4.13 Verify all three tools register via singleton
-- [ ] 4.14 Full suite green (legacy `/research` still works)
-- [ ] 4.15 Commit — `feat(api): add web_search/fetch_url/repo_search tools with registration`
+- [x] 4.1 Create `app/tools/web_search.py` (register + error-wrap)
+- [x] 4.2 Write test for `web_search` (returns results, wraps exceptions)
+- [x] 4.3 Add `web_search` import to `app/tools/__init__.py`
+- [x] 4.4 Run web_search tests — expect 2 passed
+- [x] 4.5 Create `app/tools/fetch_url.py` (httpx.AsyncClient, 10s timeout, 50KB cap)
+- [x] 4.6 Test `fetch_url` (body + error-on-exception)
+- [x] 4.7 Add `fetch_url` import to `__init__.py`
+- [x] 4.8 Run fetch_url tests — expect 2 passed
+- [x] 4.9 Create `app/tools/repo_search.py` (`git grep` subprocess, 5s timeout)
+- [x] 4.10 Test `repo_search` (finds known symbol; empty on garbage)
+- [x] 4.11 Add `repo_search` import to `__init__.py`
+- [x] 4.12 Run repo_search tests — expect 2 passed
+- [x] 4.13 Verify all three tools register via singleton
+- [x] 4.14 Full suite green (legacy `/research` still works)
+- [x] 4.15 Commit — `feat(api): add web_search/fetch_url/repo_search tools with registration`
 
 #### T6 — ReAct builder + refined prompts (Wave 2, after T1, T2, T3, T5)
 - [ ] 6.1 Overwrite the 5 specialist prompts with refined content
