@@ -118,7 +118,7 @@ Start with **#1** to verify the setup is healthy before trying the longer ones.
 
 ## Documentation
 
-- [Design spec](./docs/2026-04-13-deep-agents-research-assistant-design.md)
-- [Implementation plan](./docs/2026-04-13-deep-agents-research-assistant-plan.md)
-- [Article notes (Deep Agents)](./docs/2026-04-13-langchain-deep-agents-notes.md)
+- [Design spec](./docs/specs/2026-04-13-deep-agents-research-assistant-design.md)
+- [Implementation plan](./docs/specs/2026-04-13-deep-agents-research-assistant-plan.md)
+- [Article notes (Deep Agents)](./docs/specs/2026-04-13-langchain-deep-agents-notes.md)
 - [Contributing guide](./CONTRIBUTING.md)

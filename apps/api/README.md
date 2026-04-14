@@ -38,4 +38,4 @@ Edit `.env`:
 | `LLM_PROVIDER` | `anthropic` (default) / `openai` / `google` |
 | `LLM_MODEL` | optional — defaults per provider |
 
-See [docs/2026-04-13-deep-agents-research-assistant-design.md](../../docs/2026-04-13-deep-agents-research-assistant-design.md) for full architecture.
+See [docs/specs/2026-04-13-deep-agents-research-assistant-design.md](../../docs/specs/2026-04-13-deep-agents-research-assistant-design.md) for full architecture.

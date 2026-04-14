@@ -32,4 +32,4 @@ npm run format:check    # prettier check (CI)
 - `lib/sseParser.ts` — pure SSE frame parser
 - `app/api/research/route.ts` — server-side proxy to FastAPI
 
-See [docs/2026-04-13-deep-agents-research-assistant-design.md](../../docs/2026-04-13-deep-agents-research-assistant-design.md) section 8 for component design.
+See [docs/specs/2026-04-13-deep-agents-research-assistant-design.md](../../docs/specs/2026-04-13-deep-agents-research-assistant-design.md) section 8 for component design.
