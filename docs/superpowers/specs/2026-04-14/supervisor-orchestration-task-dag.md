@@ -48,7 +48,7 @@ grep -c '^- \[ \]' "$DAG"
 | T5  | Classifier                        |  1   | [ ]  | [ ]         | [x]  | Coder-C            | 2c5be69    |
 | T9  | Shared runner + SSE event factory |  1   | [ ]  | [ ]         | [x]  | Coder-E            | 22e093b    |
 | T4  | Tools                             |  2   | [ ]  | [ ]         | [x]  | Coder-E            | 7e7527c    |
-| T6  | ReAct builder + refined prompts   |  2   | [ ]  | [x]         | [ ]  | Coder-D            | —          |
+| T6  | ReAct builder + refined prompts   |  2   | [ ]  | [ ]         | [x]  | Coder-D            | eb3b771    |
 | T7  | Deep-research builder             |  2   | [ ]  | [ ]         | [x]  | Coder-C            | 827c364    |
 | T8  | Supervisor graph + bypass graph   |  3   | [x]  | [ ]         | [ ]  | —                  | —          |
 | T10 | Routers + /chat + /research + FE  |  4   | [x]  | [ ]         | [ ]  | —                  | —          |
@@ -139,14 +139,14 @@ Each task's owning agent ticks these as it executes the TDD micro-steps from the
 - [x] 4.15 Commit — `feat(api): add web_search/fetch_url/repo_search tools with registration`
 
 #### T6 — ReAct builder + refined prompts (Wave 2, after T1, T2, T3, T5)
-- [ ] 6.1 Overwrite the 5 specialist prompts with refined content
-- [ ] 6.2 Write failing test for `build_react_agent` (no-tools + with-tools)
-- [ ] 6.3 Run test — expect FAIL
-- [ ] 6.4 Implement `app/agents/builders/react.py::build_react_agent(...)`
-- [ ] 6.5 Run tests — expect 2 passed
-- [ ] 6.6 Lint + type-check
-- [ ] 6.7 Full suite green
-- [ ] 6.8 Commit — `feat(api): add ReAct builder and refined prompts for five specialists`
+- [x] 6.1 Overwrite the 5 specialist prompts with refined content
+- [x] 6.2 Write failing test for `build_react_agent` (no-tools + with-tools)
+- [x] 6.3 Run test — expect FAIL
+- [x] 6.4 Implement `app/agents/builders/react.py::build_react_agent(...)`
+- [x] 6.5 Run tests — expect 2 passed
+- [x] 6.6 Lint + type-check
+- [x] 6.7 Full suite green
+- [x] 6.8 Commit — `feat(api): add ReAct builder and refined prompts for five specialists`
 
 #### T7 — Deep-research builder (Wave 2, after T1, T2, T3)
 - [x] 7.1 Write failing test — `build_deep_research_agent` composes subagents
