@@ -7,7 +7,6 @@ from app.services.search_tool import internet_search
 from app.stores.memory_store import get_checkpointer, get_store
 
 
-
 def build_research_agent(
     main_prompt: str,
     researcher_prompt: str,

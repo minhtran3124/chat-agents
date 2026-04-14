@@ -35,7 +35,7 @@ def test_missing_provider_key_raises(monkeypatch):
     from app.config.settings import Settings
 
     with pytest.raises(ValidationError, match="OPENAI_API_KEY is missing"):
-        Settings()
+        Settings(_env_file=None)
 
 
 def test_missing_tavily_key_raises(monkeypatch):
@@ -46,7 +46,7 @@ def test_missing_tavily_key_raises(monkeypatch):
     from app.config.settings import Settings
 
     with pytest.raises(ValidationError):
-        Settings()
+        Settings(_env_file=None)
 
 
 def test_explicit_llm_model_is_preserved(monkeypatch):

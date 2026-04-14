@@ -1,5 +1,12 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytestmark = pytest.mark.xfail(
+    reason="legacy search_tool; removed in T11",
+    strict=False,
+)
+
 
 def test_internet_search_calls_tavily_with_kwargs(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "anthropic")

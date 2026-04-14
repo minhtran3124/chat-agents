@@ -173,7 +173,7 @@ def test_missing_active_yaml_file_raises(tmp_path):
     (tmp_path / "main" / "v1.md").write_text("text")
     # active.yaml intentionally not created
 
-    with pytest.raises(RuntimeError, match="active.yaml not found"):
+    with pytest.raises(RuntimeError, match=r"active\.yaml not found"):
         PromptRegistry(prompts_dir=tmp_path)
 
 
@@ -182,7 +182,7 @@ def test_missing_prompts_dir_raises(tmp_path):
 
     # bypass helper — needs explicit empty/missing active.yaml or directory
     missing = tmp_path / "does_not_exist"
-    with pytest.raises(RuntimeError, match="Prompts directory.*not found"):
+    with pytest.raises(RuntimeError, match=r"Prompts directory.*not found"):
         PromptRegistry(prompts_dir=missing)
 
 

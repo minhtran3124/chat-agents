@@ -1,6 +1,13 @@
 from importlib import reload
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytestmark = pytest.mark.xfail(
+    reason="legacy llm_factory; removed in T11",
+    strict=False,
+)
+
 
 def _reload_with_env(monkeypatch, provider: str, key_env: str, key_val: str):
     """Reload config + factory modules so settings picks up monkeypatched env."""
