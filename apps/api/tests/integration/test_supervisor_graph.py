@@ -13,7 +13,8 @@ def registries(tmp_path: Path):
     from app.tools.registry import ToolRegistry
 
     yaml_path = tmp_path / "models.yaml"
-    yaml_path.write_text(dedent("""
+    yaml_path.write_text(
+        dedent("""
         classifier:
           provider: openai
           model: gpt-4o-mini
@@ -24,12 +25,14 @@ def registries(tmp_path: Path):
         main:
           provider: openai
           model: gpt-4o
-    """))
+    """)
+    )
     model_reg = ModelRegistry(yaml_path=yaml_path, env={})
     model_reg.build = MagicMock(return_value=MagicMock(name="llm"))  # type: ignore[method-assign]
 
     tool_reg = ToolRegistry()
     for name in ("web_search", "fetch_url", "repo_search"):
+
         @tool_reg.register(name)
         @tool_deco
         def _stub(q: str, _n=name) -> str:
@@ -61,5 +64,12 @@ def test_supervisor_graph_compiles_with_all_six_specialists(registries) -> None:
 
     # All six specialist node names must be registered on the graph.
     node_names = set(graph.nodes.keys())
-    assert {"classifier", "chat", "research", "deep-research",
-            "summarize", "code", "planner"}.issubset(node_names)
+    assert {
+        "classifier",
+        "chat",
+        "research",
+        "deep-research",
+        "summarize",
+        "code",
+        "planner",
+    }.issubset(node_names)

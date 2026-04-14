@@ -29,6 +29,7 @@ def test_duplicate_registration_raises() -> None:
         return text
 
     with pytest.raises(RuntimeError, match="already registered"):
+
         @reg.register("twice")
         @tool
         def second(text: str) -> str:
@@ -67,4 +68,5 @@ def test_get_many_preserves_order() -> None:
 def test_singleton_registers_all_initial_tools() -> None:
     import app.tools  # noqa: F401 — triggers registration
     from app.tools.registry import registry
+
     assert {"web_search", "fetch_url", "repo_search"}.issubset(set(registry.names()))

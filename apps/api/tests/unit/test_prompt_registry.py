@@ -4,6 +4,7 @@
 Uses pytest's tmp_path fixture to create isolated on-disk prompt directories
 so tests never touch the real prompts/ folder or depend on its state.
 """
+
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,7 @@ def _make_registry(tmp_path: Path, prompts: dict, active: dict):
 
 
 # ── Happy path ────────────────────────────────────────────────────────────────
+
 
 def test_get_returns_active_version(tmp_path):
     reg = _make_registry(
@@ -67,6 +69,7 @@ def test_active_versions_returns_copy(tmp_path):
 
 # ── resolve_versions merge logic ─────────────────────────────────────────────
 
+
 def test_resolve_versions_no_overrides(tmp_path):
     reg = _make_registry(
         tmp_path,
@@ -104,6 +107,7 @@ def test_resolve_versions_unknown_key_ignored(tmp_path):
 
 
 # ── Error contract ────────────────────────────────────────────────────────────
+
 
 def test_get_unknown_name_raises(tmp_path):
     reg = _make_registry(
@@ -199,6 +203,7 @@ def test_empty_md_file_raises(tmp_path):
 
 
 # ── Hot-reload ────────────────────────────────────────────────────────────────
+
 
 def test_reload_picks_up_new_version(tmp_path):
     reg = _make_registry(

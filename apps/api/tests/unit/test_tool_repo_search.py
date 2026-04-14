@@ -7,7 +7,7 @@ from app.tools.repo_search import repo_search
 async def test_repo_search_finds_known_symbol() -> None:
     result = await repo_search.ainvoke({"pattern": "create_deep_agent"})
     assert "matches" in result
-    assert any("agent_factory.py" in line for line in result["matches"])
+    assert any("deep_research.py" in line for line in result["matches"])
 
 
 @pytest.mark.unit

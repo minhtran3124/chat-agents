@@ -13,14 +13,16 @@ def fake_registries(tmp_path: Path):
     from app.tools.registry import ToolRegistry
 
     yaml_path = tmp_path / "models.yaml"
-    yaml_path.write_text(dedent("""
+    yaml_path.write_text(
+        dedent("""
         fast:
           provider: openai
           model: gpt-4o-mini
         main:
           provider: openai
           model: gpt-4o
-    """))
+    """)
+    )
     model_reg = ModelRegistry(yaml_path=yaml_path, env={})
     model_reg.build = MagicMock(return_value=MagicMock(name="fake_llm"))  # type: ignore[method-assign]
 
@@ -42,9 +44,8 @@ def fake_registries(tmp_path: Path):
 def test_build_deep_research_composes_subagents(fake_registries) -> None:
     model_reg, tool_reg, prompt_reg = fake_registries
     spec = next(
-        s for s in __import__(
-            "app.agents.specs", fromlist=["REGISTERED_SPECS"]
-        ).REGISTERED_SPECS
+        s
+        for s in __import__("app.agents.specs", fromlist=["REGISTERED_SPECS"]).REGISTERED_SPECS
         if s.name == "deep-research"
     )
 

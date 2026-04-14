@@ -13,14 +13,17 @@ def app_with_fakes(monkeypatch):
     from langchain_core.messages import AIMessageChunk
 
     async def fake_supervisor_astream(*args, **kwargs):
-        yield ("updates", {
-            "classifier": {
-                "current_intent": "chat",
-                "confidence": 0.92,
-                "fallback_used": False,
-                "routing_history": [],
-            }
-        })
+        yield (
+            "updates",
+            {
+                "classifier": {
+                    "current_intent": "chat",
+                    "confidence": 0.92,
+                    "fallback_used": False,
+                    "routing_history": [],
+                }
+            },
+        )
         yield ("messages", (AIMessageChunk(content="Hello!"), {}))
 
     fake_supervisor = MagicMock()
@@ -36,6 +39,7 @@ def app_with_fakes(monkeypatch):
         patch("app.main.build_deep_research_only_graph", return_value=fake_deep),
     ):
         from app.main import app
+
         with TestClient(app) as client:
             yield client
 
@@ -56,7 +60,7 @@ def test_chat_endpoint_emits_intent_classified(app_with_fakes) -> None:
     for chunk in normalized.split("\n\n"):
         if "event: intent_classified" in chunk:
             data_line = next(line for line in chunk.splitlines() if line.startswith("data: "))
-            data = json.loads(data_line[len("data: "):])
+            data = json.loads(data_line[len("data: ") :])
             assert data["intent"] == "chat"
             assert data["confidence"] == 0.92
             assert data["fallback_used"] is False

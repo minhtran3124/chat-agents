@@ -28,6 +28,7 @@ def research_app(monkeypatch):
         patch("app.main.build_deep_research_only_graph", return_value=fake_deep),
     ):
         from app.main import app
+
         with TestClient(app) as client:
             yield client
 
@@ -38,9 +39,7 @@ def test_research_endpoint_streams_expected_event_sequence(research_app) -> None
         body = "".join(resp.iter_text())
 
     seen_events = [
-        line.split(":", 1)[1].strip()
-        for line in body.splitlines()
-        if line.startswith("event:")
+        line.split(":", 1)[1].strip() for line in body.splitlines() if line.startswith("event:")
     ]
 
     assert "stream_start" in seen_events
@@ -53,7 +52,7 @@ def test_research_endpoint_streams_expected_event_sequence(research_app) -> None
     for chunk in normalized.split("\n\n"):
         if "event: intent_classified" in chunk:
             data_line = next(line for line in chunk.splitlines() if line.startswith("data: "))
-            data = json.loads(data_line[len("data: "):])
+            data = json.loads(data_line[len("data: ") :])
             assert data["intent"] == "deep-research"
             assert data["confidence"] == 1.0
             assert data["fallback_used"] is False
@@ -79,6 +78,7 @@ def test_synthetic_compression_emitted_when_no_real_compression(monkeypatch) -> 
     fake_supervisor = MagicMock()
 
     from app.main import app
+
     with (
         patch("app.main.build_supervisor_graph", return_value=fake_supervisor),
         patch("app.main.build_deep_research_only_graph", return_value=fake_deep),
@@ -86,9 +86,7 @@ def test_synthetic_compression_emitted_when_no_real_compression(monkeypatch) -> 
         client.stream("POST", "/research", json={"question": "compare X"}) as resp,
     ):
         seen_events = [
-            line.split(":", 1)[1].strip()
-            for line in resp.iter_lines()
-            if line.startswith("event:")
+            line.split(":", 1)[1].strip() for line in resp.iter_lines() if line.startswith("event:")
         ]
 
     assert "compression_triggered" in seen_events

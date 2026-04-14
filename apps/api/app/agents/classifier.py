@@ -40,10 +40,7 @@ async def classify(
     # Apply stickiness first, then fallback threshold.
     # Stickiness (>=0.40) overrides the fallback threshold (0.55) when the
     # current intent already matches — prevents thrashing on borderline inputs.
-    if (
-        current_intent == result.intent
-        and result.confidence >= _STICKINESS_THRESHOLD
-    ):
+    if current_intent == result.intent and result.confidence >= _STICKINESS_THRESHOLD:
         return result  # stickiness match — keep the current routing
 
     if result.confidence < _CONFIDENCE_FALLBACK_THRESHOLD:

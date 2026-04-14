@@ -11,7 +11,9 @@ from app.schemas.routing import ClassifierResult
 async def test_classifier_returns_intent_and_confidence() -> None:
     fake_llm = AsyncMock()
     fake_llm.with_structured_output = MagicMock(return_value=fake_llm)
-    fake_llm.ainvoke.return_value = ClassifierResult(intent="chat", confidence=0.9, fallback_used=False)
+    fake_llm.ainvoke.return_value = ClassifierResult(
+        intent="chat", confidence=0.9, fallback_used=False
+    )
 
     result = await classify(
         messages=[HumanMessage("hi")],
@@ -46,7 +48,9 @@ async def test_low_confidence_falls_back_to_chat() -> None:
     fake_llm = AsyncMock()
     fake_llm.with_structured_output = MagicMock(return_value=fake_llm)
     fake_llm.ainvoke.return_value = ClassifierResult(
-        intent="research", confidence=0.30, fallback_used=False,
+        intent="research",
+        confidence=0.30,
+        fallback_used=False,
     )
     result = await classify(
         messages=[HumanMessage("asdf qwerty")],
@@ -63,7 +67,9 @@ async def test_stickiness_preserves_current_intent() -> None:
     fake_llm = AsyncMock()
     fake_llm.with_structured_output = MagicMock(return_value=fake_llm)
     fake_llm.ainvoke.return_value = ClassifierResult(
-        intent="research", confidence=0.45, fallback_used=False,
+        intent="research",
+        confidence=0.45,
+        fallback_used=False,
     )
     result = await classify(
         messages=[HumanMessage("tell me more")],

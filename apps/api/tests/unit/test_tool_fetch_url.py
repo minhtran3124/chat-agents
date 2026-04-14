@@ -18,6 +18,7 @@ async def test_fetch_url_returns_body() -> None:
         mock_ctor.return_value.__aenter__.return_value = mock_client
 
         from app.tools.fetch_url import fetch_url
+
         result = await fetch_url.ainvoke({"url": "http://example.com/"})
 
     assert result["status"] == 200
@@ -29,6 +30,7 @@ async def test_fetch_url_returns_error_on_exception() -> None:
     with patch("app.tools.fetch_url.httpx.AsyncClient") as mock_ctor:
         mock_ctor.return_value.__aenter__.side_effect = httpx.ConnectError("dns")
         from app.tools.fetch_url import fetch_url
+
         result = await fetch_url.ainvoke({"url": "http://bad"})
     assert "error" in result
     assert "dns" in result["error"]

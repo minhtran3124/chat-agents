@@ -4,7 +4,12 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 IntentName = Literal[
-    "chat", "research", "deep-research", "summarize", "code", "planner",
+    "chat",
+    "research",
+    "deep-research",
+    "summarize",
+    "code",
+    "planner",
 ]
 
 

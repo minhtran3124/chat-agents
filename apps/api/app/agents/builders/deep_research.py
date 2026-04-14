@@ -23,7 +23,9 @@ def build_deep_research_agent(
             SubAgent(
                 name=sub.name,
                 description=_description_for(sub.name),
-                system_prompt=prompt_registry.get(sub.prompt_name, version=versions.get(sub.prompt_name)),
+                system_prompt=prompt_registry.get(
+                    sub.prompt_name, version=versions.get(sub.prompt_name)
+                ),
                 tools=tool_registry.get_many(sub.tools),
                 model=model_registry.build(sub.model_role),
             )

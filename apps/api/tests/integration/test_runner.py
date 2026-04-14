@@ -26,7 +26,7 @@ async def test_runner_emits_expected_event_sequence() -> None:
         question="hi",
         thread_id="t1",
         versions_used={"classifier": "v1"},
-        force_intent="chat",   # short-circuit the classifier path
+        force_intent="chat",  # short-circuit the classifier path
     ):
         events.append(ev)
 

@@ -13,7 +13,8 @@ def fake_registries(tmp_path: Path) -> tuple[MagicMock, MagicMock, MagicMock]:
     from app.tools.registry import ToolRegistry
 
     yaml_path = tmp_path / "models.yaml"
-    yaml_path.write_text(dedent("""
+    yaml_path.write_text(
+        dedent("""
         fast:
           provider: openai
           model: gpt-4o-mini
@@ -24,7 +25,8 @@ def fake_registries(tmp_path: Path) -> tuple[MagicMock, MagicMock, MagicMock]:
           model: gpt-4o
           temperature: 0.7
           streaming: true
-    """))
+    """)
+    )
     model_reg = ModelRegistry(yaml_path=yaml_path, env={})
     # Mock build() so we do not initialize a real LLM client.
     model_reg.build = MagicMock(return_value=MagicMock(name="fake_llm"))  # type: ignore[method-assign]

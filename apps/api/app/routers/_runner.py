@@ -24,7 +24,9 @@ async def run_graph(
 
     logger.info(
         "[RUNNER] invoked thread_id=%s force_intent=%s question=%r",
-        thread_id, force_intent, question[:120],
+        thread_id,
+        force_intent,
+        question[:120],
     )
     yield events.stream_start(thread_id)
 

@@ -79,15 +79,14 @@ class ChunkMapper:
             # into the report — their content is internal agent state.
             msg_type: str = getattr(msg_chunk, "type", "") or ""
             if msg_type not in ("ai", "AIMessageChunk"):
-                logger.debug(
-                    "[CHUNK_MAPPER] messages: skipping non-AI chunk type=%s", msg_type
-                )
+                logger.debug("[CHUNK_MAPPER] messages: skipping non-AI chunk type=%s", msg_type)
                 return
             tool_calls = getattr(msg_chunk, "tool_calls", None) or []
             for tc in tool_calls:
                 logger.info(
                     "[CHUNK_MAPPER] tool_call name=%s args=%s",
-                    tc.get("name"), str(tc.get("args", {}))[:200],
+                    tc.get("name"),
+                    str(tc.get("args", {}))[:200],
                 )
             content: str = getattr(msg_chunk, "content", None) or ""
             if content:
@@ -105,7 +104,8 @@ class ChunkMapper:
             self.seen_nodes.add(node_name)
             logger.info(
                 "[CHUNK_MAPPER] node=%s keys=%s%s",
-                node_name, list(update.keys()),
+                node_name,
+                list(update.keys()),
                 " (first-seen)" if is_new else "",
             )
 
@@ -143,7 +143,9 @@ class ChunkMapper:
                     self._active_subagents.add(tc_id)
                     logger.info(
                         "[CHUNK_MAPPER] subagent_started tool_call_id=%s type=%s desc=%r",
-                        tc_id, subagent_type, description[:120],
+                        tc_id,
+                        subagent_type,
+                        description[:120],
                     )
                     yield events.subagent_started(tc_id, subagent_type, description)
 
@@ -154,7 +156,8 @@ class ChunkMapper:
                     content_str = content if isinstance(content, str) else str(content)
                     logger.info(
                         "[CHUNK_MAPPER] subagent_completed tool_call_id=%s summary=%r",
-                        tool_call_id, content_str[:120],
+                        tool_call_id,
+                        content_str[:120],
                     )
                     yield events.subagent_completed(tool_call_id, content_str[:500])
 
@@ -172,7 +175,8 @@ class ChunkMapper:
             self.saw_compression = True
             logger.info(
                 "[CHUNK_MAPPER] compression_triggered prev=%d current=%d ratio=%.2f",
-                self._prev_token_count, current,
+                self._prev_token_count,
+                current,
                 current / self._prev_token_count,
             )
             yield events.compression_triggered(self._prev_token_count, current)

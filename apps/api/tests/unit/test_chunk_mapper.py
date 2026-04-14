@@ -142,12 +142,7 @@ async def test_parallel_task_calls_tracked_separately():
     # Completions arrive in reverse order — both must be recognized.
     tool_2 = ToolMessage(content="critique OK", tool_call_id="call_2", name="task")
     tool_1 = ToolMessage(content="research OK", tool_call_id="call_1", name="task")
-    done = [
-        ev
-        async for ev in mapper.process(
-            "updates", {"tools": {"messages": [tool_2, tool_1]}}
-        )
-    ]
+    done = [ev async for ev in mapper.process("updates", {"tools": {"messages": [tool_2, tool_1]}})]
     assert [ev["event"] for ev in done] == ["subagent_completed", "subagent_completed"]
     done_ids = [json.loads(ev["data"])["id"] for ev in done]
     assert done_ids == ["call_2", "call_1"]
@@ -174,6 +169,7 @@ async def test_overwrite_wrapped_messages_does_not_crash():
 
     class FakeOverwrite:
         """Minimal stand-in for langgraph's Overwrite channel type."""
+
         def __init__(self, value: list) -> None:
             self.value = value
 

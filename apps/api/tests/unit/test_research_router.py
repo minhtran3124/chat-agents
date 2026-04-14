@@ -3,6 +3,7 @@
 
 Updated for T10: router now delegates to _runner.run_graph with force_intent="deep-research".
 """
+
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
