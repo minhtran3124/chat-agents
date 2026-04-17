@@ -2,14 +2,26 @@
 
 A FastAPI + Next.js 14 demo showcasing multi-agent orchestration with [LangChain Deep Agents](https://github.com/langchain-ai/deepagents) and [LangGraph](https://github.com/langchain-ai/langgraph).
 
-Two endpoints: **`POST /chat`** routes through a classifier to one of 6 specialists; **`POST /research`** bypasses routing and runs the full deep-research pipeline directly. Both stream progress over SSE to a live dashboard.
+## How it works
 
-## Screenshots
+Two endpoints sit behind a single chat interface:
 
-![Dashboard overview](./docs/screenshots/dashboard.png)
-![Plan completed](./docs/screenshots/plan.png)
-![Researchers panel](./docs/screenshots/researchers.png)
-![Files panel](./docs/screenshots/files.png)
+| Endpoint | Behaviour |
+| :--- | :--- |
+| `POST /chat` | Classifier routes the question to one of 6 specialists |
+| `POST /research` | Bypasses classifier; always runs the full deep-research pipeline |
+
+Both stream progress over SSE to a live Next.js dashboard. The deep-research pipeline uses the 5 built-in Deep Agents capabilities: planning, virtual filesystem, subagent spawning, context compression, and cross-conversation memory.
+
+## Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| Backend | Python 3.11+, FastAPI, LangGraph, LangChain Deep Agents |
+| Frontend | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS |
+| LLM | OpenAI gpt-4o / gpt-4o-mini (default) — switchable to Anthropic or Google |
+| Search | Tavily API |
+| State | SQLite (LangGraph checkpointer) |
 
 ## Quickstart
 
@@ -18,7 +30,7 @@ Two endpoints: **`POST /chat`** routes through a classifier to one of 6 speciali
 cd apps/api
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env       # fill in OPENAI_API_KEY and TAVILY_API_KEY
+cp .env.example .env       # fill OPENAI_API_KEY and TAVILY_API_KEY
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -26,13 +38,13 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd apps/web
 npm install
-cp .env.example .env.local # set API_URL=http://localhost:8000
-npm run dev                # http://localhost:3000/research
+cp .env.example .env.local  # set API_URL=http://localhost:8000
+npm run dev                  # http://localhost:3000/research
 ```
 
-## More Detail
+## Docs
 
-- [Backend README](./apps/api/README.md) — architecture, agents, SSE events, config
-- [Frontend README](./apps/web/README.md) — components, SSE client, testing
-- [Contributing guide](./CONTRIBUTING.md)
+- [Backend reference](./apps/api/README.md) — endpoints, agents, SSE events, model config
+- [Frontend reference](./apps/web/README.md) — SSE client, components, testing
 - [Design spec](./docs/specs/2026-04-13-deep-agents-research-assistant-design.md)
+- [Contributing guide](./CONTRIBUTING.md)
