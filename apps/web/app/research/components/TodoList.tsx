@@ -32,10 +32,7 @@ export function TodoList({ items }: { items: TodoItem[] }) {
                 className="animate-fade-in-up flex items-start gap-3 leading-snug"
                 style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}
               >
-                <span
-                  className={`mt-1.5 h-2 w-2 flex-none rounded-full ${s.dot}`}
-                  aria-hidden
-                />
+                <span className={`mt-1.5 h-2 w-2 flex-none rounded-full ${s.dot}`} aria-hidden />
                 <span className={s.text}>{t.content}</span>
               </li>
             );

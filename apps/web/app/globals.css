@@ -221,8 +221,13 @@ body {
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* ---------------------------------------------------------------- */
@@ -267,8 +272,12 @@ body {
 }
 
 @keyframes spinSlow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin-slow {
@@ -277,7 +286,9 @@ body {
 
 /* Three-dot typing indicator — each dot pulses with staggered delay */
 @keyframes loadingDot {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     opacity: 0.3;
     transform: translateY(0);
   }
@@ -364,8 +375,12 @@ body {
 
 /* Progress bar that drains over 5 seconds — matches the toast TTL. */
 @keyframes toastDrain {
-  from { transform: scaleX(1); }
-  to   { transform: scaleX(0); }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 .toast-drain {
@@ -377,8 +392,12 @@ body {
 /* Loading shimmer bar — sits under QuestionForm while "loading".   */
 /* ---------------------------------------------------------------- */
 @keyframes loadingSlide {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(400%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
 }
 
 .loading-bar {
@@ -393,11 +412,6 @@ body {
   position: absolute;
   inset: 0;
   width: 25%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--terracotta) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, var(--terracotta) 50%, transparent 100%);
   animation: loadingSlide 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }

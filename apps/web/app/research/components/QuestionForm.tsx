@@ -15,11 +15,7 @@ export function QuestionForm({
 }) {
   const [q, setQ] = useState("");
 
-  const buttonLabel = loading
-    ? "Preparing…"
-    : disabled
-      ? "Researching…"
-      : "Begin";
+  const buttonLabel = loading ? "Preparing…" : disabled ? "Researching…" : "Begin";
 
   return (
     <form
@@ -54,20 +50,8 @@ export function QuestionForm({
 
 function ButtonSpinner() {
   return (
-    <svg
-      className="h-4 w-4 animate-spin-slow"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeOpacity="0.3"
-      />
+    <svg className="animate-spin-slow h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.3" />
       <path
         d="M21 12a9 9 0 0 0-9-9"
         stroke="currentColor"

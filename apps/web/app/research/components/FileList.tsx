@@ -16,11 +16,7 @@ export function FileList({ files }: { files: FileRef[] }) {
       ) : (
         <ul className="max-h-80 space-y-1.5 overflow-y-auto pr-1 font-mono text-xs">
           {files.map((f) => (
-            <li
-              key={f.path}
-              title={`${f.path}\n\n${f.preview}`}
-              className="flex items-start gap-2"
-            >
+            <li key={f.path} title={`${f.path}\n\n${f.preview}`} className="flex items-start gap-2">
               <span className="mt-[3px] flex-none text-terracotta" aria-hidden>
                 ▸
               </span>
