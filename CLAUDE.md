@@ -6,6 +6,13 @@ Short briefing for Claude Code working in this repo. Keep this file tight — it
 
 Deep Agents research assistant demo: FastAPI + `deepagents`/LangGraph backend (`apps/api/`) streams SSE events to a Next.js 14 dashboard (`apps/web/`). Single endpoint `POST /research` proxied through `/api/research` on the web side.
 
+## Working style
+
+- **Think before coding.** State assumptions. When a request has multiple readings, surface them — don't silently pick. If something's unclear, stop and ask.
+- **Simplicity first.** Minimum code that solves the problem. No speculative abstractions, no "flexibility" that wasn't asked for, no error handling for impossible states.
+- **Surgical changes.** Every diff line traces to the request. Don't "improve" adjacent code, reformat untouched files, or refactor what isn't broken. Match existing style even if you'd personally do it differently.
+- **Goal-driven execution.** Turn vague asks into verifiable criteria before you start ("fix the bug" → "write a failing test, then make it pass"). For multi-step work, plan briefly and verify each step.
+
 ## Where to look
 
 | Need | Read |
@@ -31,7 +38,7 @@ cd apps/web && npm run lint
 
 Env: `apps/api/.env` needs `ANTHROPIC_API_KEY` (or `OPENAI_`/`GOOGLE_API_KEY` matching `LLM_PROVIDER`) and `TAVILY_API_KEY`. `apps/web/.env.local` needs `API_URL`.
 
-## How to work here
+## Project rules
 
 - **Follow the rules files.** If architecture.md or guidelines.md conflicts with habit, rules win.
 - **Prompts are versioned.** Never edit an existing `prompts/<name>/vN.md` — add a new version and update `active.yaml`.
