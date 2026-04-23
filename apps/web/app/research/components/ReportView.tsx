@@ -2,6 +2,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Status = "idle" | "loading" | "streaming" | "done" | "error";
+type Source = "stream" | "file" | null;
 
 /**
  * Normalise agent output before handing it to react-markdown.
@@ -42,9 +43,11 @@ function sanitizeReport(text: string): string {
 export function ReportView({
   text,
   status = "idle",
+  source = null,
 }: {
   text: string;
   status?: Status;
+  source?: Source;
 }) {
   if (!text) {
     if (status === "loading") return <Preparing />;
@@ -52,6 +55,7 @@ export function ReportView({
   }
 
   const streaming = status === "streaming";
+  const reconstructed = status === "done" && source === "file";
   const clean = sanitizeReport(text);
 
   return (
@@ -63,8 +67,16 @@ export function ReportView({
             <span className="animate-soft-pulse">●</span> writing
           </span>
         )}
-        {status === "done" && (
+        {status === "done" && !reconstructed && (
           <span className="text-[10px] uppercase tracking-caps text-olive">ready</span>
+        )}
+        {reconstructed && (
+          <span
+            className="text-[10px] uppercase tracking-caps text-amber"
+            title="The agent saved the report to a file instead of replying inline; the UI rebuilt it from draft.md."
+          >
+            rebuilt from notes
+          </span>
         )}
       </div>
       {/* brief-streaming disables the drop-cap while output is mid-stream */}

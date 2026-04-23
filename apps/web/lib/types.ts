@@ -24,5 +24,10 @@ export type SSEEventMap = {
   text_delta: { content: string };
   memory_updated: { namespace: string; key: string };
   error: { message: string; recoverable: boolean };
-  stream_end: { final_report: string; usage: Record<string, unknown>; versions_used: Record<string, string> };
+  stream_end: {
+    final_report: string;
+    usage: Record<string, unknown>;
+    versions_used: Record<string, string>;
+    final_report_source?: "stream" | "file";
+  };
 };

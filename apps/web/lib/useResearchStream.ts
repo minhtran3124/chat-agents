@@ -7,12 +7,15 @@ function newThreadId(): string {
   return crypto.randomUUID();
 }
 
+export type ReportSource = "stream" | "file";
+
 export type ResearchState = {
   todos: TodoItem[];
   files: FileRef[];
   subagents: Record<string, SubagentRun>;
   compressions: CompressionEvent[];
   report: string;
+  reportSource: ReportSource | null;
   status: "idle" | "loading" | "streaming" | "done" | "error";
   question?: string;
   error?: string;
@@ -24,6 +27,7 @@ export const initial: ResearchState = {
   subagents: {},
   compressions: [],
   report: "",
+  reportSource: null,
   status: "idle",
 };
 
@@ -65,6 +69,12 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
         ...state,
         status: "done",
         report: data.final_report || state.report,
+        // If the backend reconstructed the report from draft.md (fallback
+        // path), mark it so the UI can badge it as such; otherwise treat
+        // as streamed.
+        reportSource: data.final_report
+          ? ((data.final_report_source as ReportSource | undefined) ?? "stream")
+          : state.reportSource ?? "stream",
         // Mark any remaining pending/in_progress todos as completed — the
         // agent doesn't always re-call write_todos at the end of each step.
         todos: state.todos.map((t) =>

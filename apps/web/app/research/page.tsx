@@ -91,7 +91,11 @@ export default function ResearchPage() {
           <FileList files={state.files} />
         </aside>
         <section className="min-w-0 flex-1 overflow-y-auto">
-          <ReportView text={state.report} status={state.status} />
+          <ReportView
+            text={state.report}
+            status={state.status}
+            source={state.reportSource}
+          />
         </section>
       </main>
 

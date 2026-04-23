@@ -87,6 +87,23 @@ describe("research reducer", () => {
     );
     expect(s.status).toBe("done");
     expect(s.report).toBe("complete");
+    expect(s.reportSource).toBe("stream");
+  });
+
+  it("stream_end with final_report_source='file' marks reportSource accordingly", () => {
+    const s = reducer(
+      { ...initial, report: "" },
+      {
+        event: "stream_end",
+        data: {
+          final_report: "# Rebuilt from draft",
+          usage: {},
+          final_report_source: "file",
+        },
+      },
+    );
+    expect(s.reportSource).toBe("file");
+    expect(s.report).toBe("# Rebuilt from draft");
   });
 
   it("stream_end marks all pending/in_progress todos as completed", () => {
