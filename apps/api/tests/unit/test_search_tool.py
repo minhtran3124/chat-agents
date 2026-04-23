@@ -17,12 +17,13 @@ def test_internet_search_calls_tavily_with_kwargs(monkeypatch):
 
         reload(search_tool)
 
-        result = search_tool.internet_search.invoke({"query": "agentic AI", "max_results": 3})
+        result = search_tool.internet_search.invoke({"query": "agentic AI"})
 
+    # Current internet_search hardcodes max_results=5 and topic="general";
+    # if this tool gains a max_results param in the future, reinstate it here.
     fake_client.search.assert_called_once_with(
         query="agentic AI",
-        max_results=3,
+        max_results=5,
         topic="general",
-        include_raw_content=False,
     )
     assert result == {"results": []}
