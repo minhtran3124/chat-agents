@@ -1,6 +1,6 @@
 import json
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 
 
 def _sse(event: str, data: dict) -> dict:
@@ -71,6 +71,7 @@ def stream_end(
     final_report: str,
     usage: dict[str, Any],
     versions_used: dict[str, str],
+    final_report_source: Literal["stream", "file"] = "stream",
 ) -> dict:
     return _sse(
         "stream_end",
@@ -78,5 +79,6 @@ def stream_end(
             "final_report": final_report,
             "usage": usage,
             "versions_used": versions_used,
+            "final_report_source": final_report_source,
         },
     )

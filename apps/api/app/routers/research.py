@@ -19,6 +19,14 @@ router = APIRouter(prefix="/research", tags=["research"])
 
 SYNTHETIC_COMPRESSION_THRESHOLD_TOKENS = 30_000
 
+# Fallback threshold: when the main agent streams fewer assistant-text
+# characters than this, we treat the run as a compliance failure (the model
+# probably saved the final report to the virtual FS instead of replying with
+# it).  If `draft.md` exists in state, we surface its content as the final
+# report and mark the source as "file" so the UI can flag it.
+MIN_STREAM_REPORT_CHARS = 200
+FALLBACK_DRAFT_FILENAME = "draft.md"
+
 
 @router.post("")
 async def research(payload: ResearchRequest) -> EventSourceResponse:
@@ -67,20 +75,42 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
             try:
                 final_state = await agent.aget_state({"configurable": {"thread_id": thread_id}})
                 usage = final_state.values.get("usage", {}) if final_state else {}
+                files = final_state.values.get("files", {}) if final_state else {}
             except Exception:
                 usage = {}
+                files = {}
 
-            report_chars = sum(len(p) for p in final_report_parts)
+            streamed_report = "".join(final_report_parts)
+            final_report = streamed_report
+            final_report_source: str = "stream"
+
+            draft = files.get(FALLBACK_DRAFT_FILENAME)
+            if (
+                len(streamed_report) < MIN_STREAM_REPORT_CHARS
+                and isinstance(draft, str)
+                and len(draft) >= MIN_STREAM_REPORT_CHARS
+            ):
+                logger.warning(
+                    "[RESEARCH] Final-report fallback triggered — streamed only %d "
+                    "chars; using %s (%d chars). Prompt compliance issue worth "
+                    "investigating (main prompt version=%s).",
+                    len(streamed_report), FALLBACK_DRAFT_FILENAME, len(draft),
+                    versions_used.get("main"),
+                )
+                final_report = draft
+                final_report_source = "file"
+
             logger.info(
-                "[RESEARCH] Stream complete thread_id=%s report_chars=%d "
+                "[RESEARCH] Stream complete thread_id=%s report_chars=%d source=%s "
                 "nodes_seen=%s prompt_versions=%s usage=%s",
-                thread_id, report_chars, sorted(mapper.seen_nodes),
-                versions_used, usage,
+                thread_id, len(final_report), final_report_source,
+                sorted(mapper.seen_nodes), versions_used, usage,
             )
             yield events.stream_end(
-                final_report="".join(final_report_parts),
+                final_report=final_report,
                 usage=usage,
                 versions_used=versions_used,
+                final_report_source=final_report_source,
             )
         except Exception as e:
             logger.error(

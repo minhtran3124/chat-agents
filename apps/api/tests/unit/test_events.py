@@ -44,6 +44,16 @@ def test_stream_end_carries_final_report_and_usage():
     assert p["final_report"] == "# report"
     assert p["usage"] == {"input_tokens": 100}
     assert p["versions_used"] == versions
+    assert p["final_report_source"] == "stream"
+
+
+def test_stream_end_final_report_source_file():
+    from app.streaming.events import stream_end
+
+    versions = {"main": "v2", "researcher": "v1", "critic": "v1"}
+    ev = stream_end("# report", {}, versions, final_report_source="file")
+    p = json.loads(ev["data"])
+    assert p["final_report_source"] == "file"
 
 
 def test_compression_triggered_default_not_synthetic():
