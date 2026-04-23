@@ -36,6 +36,11 @@ include = ["app*"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "-ra -q"
+markers = [
+    "unit: fast isolated tests with no external dependencies",
+    "integration: tests exercising wired services with mocked externals",
+    "e2e: end-to-end tests hitting the app factory via ASGITransport",
+]
 
 # ----- Ruff: linter + formatter (replaces black / isort / flake8 / pyupgrade) -----
 [tool.ruff]
