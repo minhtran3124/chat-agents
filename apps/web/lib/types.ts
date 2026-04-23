@@ -14,6 +14,13 @@ export type CompressionEvent = {
   synthetic?: boolean;
 };
 
+export type ReflectionRole = "main" | "researcher";
+export type Reflection = {
+  role: ReflectionRole;
+  reflection: string;
+  at: number;
+};
+
 export type SSEEventMap = {
   stream_start: { thread_id: string; started_at: string };
   todo_updated: { items: TodoItem[] };
@@ -23,6 +30,7 @@ export type SSEEventMap = {
   compression_triggered: CompressionEvent;
   text_delta: { content: string };
   memory_updated: { namespace: string; key: string };
+  reflection_logged: { role: ReflectionRole; reflection: string };
   error: { message: string; recoverable: boolean };
   stream_end: {
     final_report: string;

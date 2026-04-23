@@ -5,6 +5,7 @@ import { QuestionForm } from "./components/QuestionForm";
 import { TodoList } from "./components/TodoList";
 import { FileList } from "./components/FileList";
 import { SubagentPanel } from "./components/SubagentPanel";
+import { ReflectionPanel } from "./components/ReflectionPanel";
 import { ReportView } from "./components/ReportView";
 import { StatusBadge } from "./components/StatusBadge";
 import { ToastStack, ToastItem } from "./components/SubagentToast";
@@ -88,14 +89,11 @@ export default function ResearchPage() {
         <aside className="w-96 flex-shrink-0 overflow-y-auto border-r border-rule bg-paper/30">
           <TodoList items={state.todos} />
           <SubagentPanel runs={state.subagents} compressions={state.compressions} />
+          <ReflectionPanel reflections={state.reflections} />
           <FileList files={state.files} />
         </aside>
         <section className="min-w-0 flex-1 overflow-y-auto">
-          <ReportView
-            text={state.report}
-            status={state.status}
-            source={state.reportSource}
-          />
+          <ReportView text={state.report} status={state.status} source={state.reportSource} />
         </section>
       </main>
 
