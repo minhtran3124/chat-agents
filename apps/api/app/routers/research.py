@@ -14,7 +14,7 @@ from app.services.agent_factory import build_research_agent
 from app.services.prompt_registry import registry
 from app.streaming import events
 from app.streaming.chunk_mapper import ChunkMapper
-from app.streaming.events import ErrorReason, FinalReportSource
+from app.streaming.events import FinalReportSource
 
 log = structlog.get_logger(__name__)
 
@@ -74,12 +74,16 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
         )
         yield events.stream_start(thread_id)
 
-        error_reason: ErrorReason | None = None
+        # Local type is wider than ErrorReason because the budget sentinel
+        # "budget_exceeded" drives the error `finally` path but is NOT a
+        # valid argument to events.error().
+        error_reason: str | None = None
         final_report_parts: list[str] = []
         usage: dict = {}
         files: dict = {}
 
         try:
+            cumulative_tokens = 0
             async with asyncio.timeout(settings.RESEARCH_TIMEOUT_S):
                 async for mode, chunk in agent.astream(
                     {"messages": [{"role": "user", "content": payload.question}]},
@@ -93,6 +97,21 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
                     },
                     stream_mode=["values", "messages", "updates"],
                 ):
+                    if mode == "messages":
+                        # chunk is (AIMessageChunk, metadata_dict) in messages mode
+                        cumulative_tokens += _extract_token_count(chunk[0])
+                        if cumulative_tokens > settings.MAX_TOKENS_PER_RUN:
+                            log.warning(
+                                "research.budget_exceeded",
+                                tokens_used=cumulative_tokens,
+                                limit=settings.MAX_TOKENS_PER_RUN,
+                            )
+                            error_reason = "budget_exceeded"
+                            yield events.budget_exceeded(
+                                tokens_used=cumulative_tokens,
+                                limit=settings.MAX_TOKENS_PER_RUN,
+                            )
+                            return
                     async for ev in mapper.process(mode, chunk):
                         if ev["event"] == "text_delta":
                             final_report_parts.append(json.loads(ev["data"])["content"])
