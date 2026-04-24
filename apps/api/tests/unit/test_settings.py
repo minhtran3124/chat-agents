@@ -104,3 +104,69 @@ def test_research_timeout_s_default_is_500(monkeypatch):
 
     s = Settings(_env_file=None)
     assert s.RESEARCH_TIMEOUT_S == 500
+
+
+@pytest.mark.unit
+def test_max_tokens_per_run_default_is_200000(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+
+    from app.config.settings import Settings
+
+    s = Settings(_env_file=None)
+    assert s.MAX_TOKENS_PER_RUN == 200_000
+
+
+@pytest.mark.unit
+def test_max_tokens_per_run_rejects_below_minimum(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+
+    from app.config.settings import Settings
+
+    with pytest.raises(ValidationError) as exc:
+        Settings(_env_file=None, MAX_TOKENS_PER_RUN=100)
+    assert "MAX_TOKENS_PER_RUN" in str(exc.value)
+
+
+@pytest.mark.unit
+def test_langchain_tracing_env_exported_when_set(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+    monkeypatch.delenv("LANGCHAIN_TRACING_V2", raising=False)
+    monkeypatch.delenv("LANGCHAIN_API_KEY", raising=False)
+    monkeypatch.delenv("LANGCHAIN_PROJECT", raising=False)
+
+    from app.config.settings import Settings
+
+    Settings(
+        _env_file=None,
+        LANGCHAIN_TRACING_V2="true",
+        LANGCHAIN_API_KEY="ls__test",
+        LANGCHAIN_PROJECT="chat-agents",
+    )
+    import os
+
+    assert os.environ.get("LANGCHAIN_TRACING_V2") == "true"
+    assert os.environ.get("LANGCHAIN_API_KEY") == "ls__test"
+    assert os.environ.get("LANGCHAIN_PROJECT") == "chat-agents"
+
+
+@pytest.mark.unit
+def test_langchain_env_not_exported_when_unset(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+    monkeypatch.delenv("LANGCHAIN_TRACING_V2", raising=False)
+    monkeypatch.delenv("LANGCHAIN_API_KEY", raising=False)
+
+    from app.config.settings import Settings
+
+    Settings(_env_file=None)
+    import os
+
+    assert "LANGCHAIN_TRACING_V2" not in os.environ
+    assert "LANGCHAIN_API_KEY" not in os.environ

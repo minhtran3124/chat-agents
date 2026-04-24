@@ -36,6 +36,16 @@ class Settings(BaseSettings):
         ),
     )
 
+    MAX_TOKENS_PER_RUN: int = Field(
+        default=200_000,
+        ge=1_000,
+        description="Token budget per /research run. Over this, the run is aborted.",
+    )
+
+    LANGCHAIN_TRACING_V2: str | None = None
+    LANGCHAIN_API_KEY: str | None = None
+    LANGCHAIN_PROJECT: str | None = None
+
     LOG_LEVEL: str = "INFO"
 
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
@@ -68,6 +78,13 @@ class Settings(BaseSettings):
                 os.environ.setdefault(env_name, value)
         if self.TAVILY_API_KEY:
             os.environ.setdefault("TAVILY_API_KEY", self.TAVILY_API_KEY)
+        for env_name, value in (
+            ("LANGCHAIN_TRACING_V2", self.LANGCHAIN_TRACING_V2),
+            ("LANGCHAIN_API_KEY", self.LANGCHAIN_API_KEY),
+            ("LANGCHAIN_PROJECT", self.LANGCHAIN_PROJECT),
+        ):
+            if value:
+                os.environ.setdefault(env_name, value)
         return self
 
 
