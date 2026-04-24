@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
+from app.observability.middleware import RequestContextMiddleware
+from app.observability.structlog_setup import configure_structlog
 from app.routers import research as research_router
 from app.services.prompt_registry import registry
 from app.stores.memory_store import lifespan_stores
@@ -18,6 +20,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    configure_structlog()
     registry.reload()  # fail fast: raises RuntimeError if prompts/ is missing
     async with lifespan_stores():
         yield
@@ -32,6 +35,8 @@ app.add_middleware(
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+app.add_middleware(RequestContextMiddleware)
 
 
 app.include_router(research_router.router)
