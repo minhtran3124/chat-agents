@@ -69,8 +69,7 @@ class PromptRegistry:
                 active[name] = raw_active[name]
             else:
                 logger.warning(
-                    "[PROMPT_REGISTRY] No active.yaml entry for '%s', "
-                    "falling back to '%s'",
+                    "[PROMPT_REGISTRY] No active.yaml entry for '%s', falling back to '%s'",
                     name,
                     _V1_FALLBACK,
                 )
@@ -88,8 +87,7 @@ class PromptRegistry:
         """Return prompt text for *name*, using *version* or the active default."""
         if name not in self._prompts:
             raise KeyError(
-                f"Unknown prompt '{name}'. "
-                f"Available: {', '.join(sorted(self._prompts))}"
+                f"Unknown prompt '{name}'. Available: {', '.join(sorted(self._prompts))}"
             )
         resolved = version or self._active.get(name, _V1_FALLBACK)
         versions = self._prompts[name]
@@ -106,17 +104,13 @@ class PromptRegistry:
         Only known prompt names are included in the result.
         Unknown keys in *overrides* are silently ignored.
         """
-        return {
-            name: overrides.get(name, active_ver)
-            for name, active_ver in self._active.items()
-        }
+        return {name: overrides.get(name, active_ver) for name, active_ver in self._active.items()}
 
     def list_versions(self, name: str) -> list[str]:
         """Return sorted list of available version keys for *name*."""
         if name not in self._prompts:
             raise KeyError(
-                f"Unknown prompt '{name}'. "
-                f"Available: {', '.join(sorted(self._prompts))}"
+                f"Unknown prompt '{name}'. Available: {', '.join(sorted(self._prompts))}"
             )
         return sorted(self._prompts[name])
 

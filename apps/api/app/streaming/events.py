@@ -10,9 +10,7 @@ ERROR_MESSAGES: dict[ErrorReason, str] = {
         "Research timed out. Please try again with a simpler question "
         "or contact support if this persists."
     ),
-    "internal": (
-        "Research failed due to an internal error. Please try again shortly."
-    ),
+    "internal": ("Research failed due to an internal error. Please try again shortly."),
 }
 
 
@@ -77,11 +75,14 @@ def reflection_logged(role: Literal["main", "researcher"], reflection: str) -> d
 
 
 def error(reason: ErrorReason) -> dict:
-    return _sse("error", {
-        "message": ERROR_MESSAGES[reason],
-        "reason": reason,
-        "recoverable": reason == "timeout",
-    })
+    return _sse(
+        "error",
+        {
+            "message": ERROR_MESSAGES[reason],
+            "reason": reason,
+            "recoverable": reason == "timeout",
+        },
+    )
 
 
 def stream_end(

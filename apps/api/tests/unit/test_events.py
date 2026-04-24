@@ -37,7 +37,6 @@ def test_text_delta_passes_content():
     assert json.loads(ev["data"])["content"] == "hello"
 
 
-
 def test_stream_end_carries_final_report_and_usage():
     from app.streaming.events import stream_end
 
