@@ -251,3 +251,52 @@ describe("useResearchStream reducer — stream_end success path", () => {
     expect(afterEnd.reportSource).toBe("file");
   });
 });
+
+describe("useResearchStream reducer — budget_exceeded event", () => {
+  it("sets budgetExceeded, status:'error', error, and errorRecoverable:false", () => {
+    const frame: SSEFrame = {
+      event: "budget_exceeded",
+      data: {
+        tokens_used: 207_432,
+        limit: 200_000,
+        message: "Run stopped: token budget exceeded (207,432 / 200,000 tokens).",
+      },
+    };
+    const next = reducer(initial, frame);
+    expect(next.status).toBe("error");
+    expect(next.error).toBe(
+      "Run stopped: token budget exceeded (207,432 / 200,000 tokens).",
+    );
+    expect(next.errorRecoverable).toBe(false);
+    expect(next.budgetExceeded).toEqual({
+      tokens_used: 207_432,
+      limit: 200_000,
+      message: "Run stopped: token budget exceeded (207,432 / 200,000 tokens).",
+    });
+  });
+
+  it("stream_end after budget_exceeded preserves error state and reports source='error'", () => {
+    const afterBudget = reducer(initial, {
+      event: "budget_exceeded",
+      data: {
+        tokens_used: 250_000,
+        limit: 200_000,
+        message: "boom",
+      },
+    } as SSEFrame);
+
+    const afterEnd = reducer(afterBudget, {
+      event: "stream_end",
+      data: {
+        final_report: "",
+        usage: {},
+        versions_used: {},
+        final_report_source: "error",
+      },
+    } as SSEFrame);
+
+    expect(afterEnd.status).toBe("error");
+    expect(afterEnd.reportSource).toBe("error");
+    expect(afterEnd.budgetExceeded).toEqual(afterBudget.budgetExceeded);
+  });
+});

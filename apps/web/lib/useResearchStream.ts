@@ -22,6 +22,7 @@ export type ResearchState = {
   error?: string;
   errorReason?: ErrorReason;
   errorRecoverable?: boolean;
+  budgetExceeded?: { tokens_used: number; limit: number; message: string };
 };
 
 export const initial: ResearchState = {
@@ -81,6 +82,14 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
         error: data.message,
         errorReason: data.reason,
         errorRecoverable: data.recoverable,
+      };
+    case "budget_exceeded":
+      return {
+        ...state,
+        status: "error",
+        budgetExceeded: data,
+        error: data.message,
+        errorRecoverable: false,
       };
     case "stream_end":
       // Error path: `error` event already set status:"error". stream_end is
