@@ -10,6 +10,7 @@ import { ReportView } from "./components/ReportView";
 import { StatusBadge } from "./components/StatusBadge";
 import { ToastStack, ToastItem } from "./components/SubagentToast";
 import { AskedCard } from "./components/AskedCard";
+import { ErrorView } from "./components/ErrorView";
 
 export default function ResearchPage() {
   const { state, start, reset } = useResearchStream();
@@ -91,16 +92,19 @@ export default function ResearchPage() {
           <FileList files={state.files} />
         </aside>
         <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto">
-          <ReportView text={state.report} status={state.status} source={state.reportSource} />
+          {state.status === "error" ? (
+            <ErrorView
+              error={state.error}
+              reason={state.errorReason}
+              recoverable={state.errorRecoverable}
+              budgetExceeded={state.budgetExceeded}
+              onReset={reset}
+            />
+          ) : (
+            <ReportView text={state.report} status={state.status} source={state.reportSource} />
+          )}
         </section>
       </main>
-
-      {state.error && (
-        <div className="border-t border-danger/30 bg-danger/5 px-6 py-3 text-sm text-danger">
-          <span className="mr-2 font-medium">Something went wrong.</span>
-          {state.error}
-        </div>
-      )}
 
       <ToastStack items={toasts} onDismiss={dismissToast} />
     </div>
