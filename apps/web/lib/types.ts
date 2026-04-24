@@ -34,6 +34,7 @@ export type SSEEventMap = {
   text_delta: { content: string };
   reflection_logged: { role: ReflectionRole; reflection: string };
   error: { message: string; reason: ErrorReason; recoverable: boolean };
+  budget_exceeded: { tokens_used: number; limit: number; message: string };
   stream_end: {
     final_report: string;
     usage: Record<string, unknown>;
