@@ -30,6 +30,7 @@ def test_get_llm_calls_init_chat_model_with_settings(monkeypatch):
             model="claude-sonnet-4-6",
             model_provider="anthropic",
             streaming=True,
+            max_retries=0,
         )
 
 
@@ -43,6 +44,7 @@ def test_get_fast_llm_uses_haiku_for_anthropic(monkeypatch):
             model="claude-haiku-4-5",
             model_provider="anthropic",
             streaming=True,
+            max_retries=0,
         )
 
 
@@ -56,4 +58,5 @@ def test_get_fast_llm_uses_gpt4o_mini_for_openai(monkeypatch):
             model="gpt-4o-mini",
             model_provider="openai",
             streaming=True,
+            max_retries=0,
         )

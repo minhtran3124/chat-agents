@@ -21,7 +21,7 @@ export type Reflection = {
   at: number;
 };
 
-export type ErrorReason = "timeout" | "internal";
+export type ErrorReason = "timeout" | "internal" | "rate_limited";
 export type FinalReportSource = "stream" | "file" | "error";
 
 export type SSEEventMap = {

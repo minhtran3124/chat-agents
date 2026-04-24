@@ -2,7 +2,7 @@ import json
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-ErrorReason = Literal["timeout", "internal"]
+ErrorReason = Literal["timeout", "internal", "rate_limited"]
 FinalReportSource = Literal["stream", "file", "error"]
 
 ERROR_MESSAGES: dict[ErrorReason, str] = {
@@ -10,8 +10,9 @@ ERROR_MESSAGES: dict[ErrorReason, str] = {
         "Research timed out. Please try again with a simpler question "
         "or contact support if this persists."
     ),
-    "internal": (
-        "Research failed due to an internal error. Please try again shortly."
+    "internal": ("Research failed due to an internal error. Please try again shortly."),
+    "rate_limited": (
+        "The AI provider is temporarily rate-limited. Wait 30 seconds and try again."
     ),
 }
 
@@ -77,11 +78,14 @@ def reflection_logged(role: Literal["main", "researcher"], reflection: str) -> d
 
 
 def error(reason: ErrorReason) -> dict:
-    return _sse("error", {
-        "message": ERROR_MESSAGES[reason],
-        "reason": reason,
-        "recoverable": reason == "timeout",
-    })
+    return _sse(
+        "error",
+        {
+            "message": ERROR_MESSAGES[reason],
+            "reason": reason,
+            "recoverable": reason == "timeout",
+        },
+    )
 
 
 def stream_end(

@@ -51,6 +51,7 @@ export function ReportView({
 }) {
   if (!text) {
     if (status === "loading") return <Preparing />;
+    if (status === "streaming") return <Researching />;
     return <Welcome />;
   }
 
@@ -149,6 +150,36 @@ function Preparing() {
           <SkeletonLine width="72%" />
           <SkeletonLine width="92%" />
           <SkeletonLine width="60%" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Researching() {
+  return (
+    <div className="mx-auto flex h-full max-w-2xl items-center px-10 py-12">
+      <div className="w-full">
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-terracotta/10 px-3 py-1 text-[10px] font-medium uppercase tracking-caps text-terracotta">
+          <span className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-terracotta" aria-hidden />
+          Researching
+        </div>
+
+        <h2 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink">
+          Researchers are <span className="italic text-terracotta">at work.</span>
+        </h2>
+
+        <p className="mt-5 max-w-lg text-base leading-relaxed text-subink">
+          Specialist researchers are digging in, saving notes as they find them. The brief will
+          begin streaming here once they surface enough to write.
+        </p>
+
+        <div className="mt-10 space-y-2.5" aria-hidden>
+          <SkeletonLine width="88%" />
+          <SkeletonLine width="74%" />
+          <SkeletonLine width="95%" />
+          <SkeletonLine width="65%" />
+          <SkeletonLine width="80%" />
         </div>
       </div>
     </div>

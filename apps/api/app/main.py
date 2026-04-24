@@ -18,7 +18,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    registry.reload()   # fail fast: raises RuntimeError if prompts/ is missing
+    registry.reload()  # fail fast: raises RuntimeError if prompts/ is missing
     async with lifespan_stores():
         yield
 

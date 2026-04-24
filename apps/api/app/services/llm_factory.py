@@ -16,6 +16,7 @@ def get_llm() -> Any:
         model=settings.LLM_MODEL,
         model_provider=settings.LLM_PROVIDER,
         streaming=True,
+        max_retries=0,
     )
 
 
@@ -24,4 +25,5 @@ def get_fast_llm() -> Any:
         model=_FAST_MODEL[settings.LLM_PROVIDER],
         model_provider=settings.LLM_PROVIDER,
         streaming=True,
+        max_retries=0,
     )

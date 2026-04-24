@@ -145,12 +145,12 @@ async def test_research_timeout_produces_error_and_stream_end(
             assert resp.status_code == 200
             async for line in resp.aiter_lines():
                 if line.startswith("event: "):
-                    event_name = line[len("event: "):].strip()
+                    event_name = line[len("event: ") :].strip()
                     events_seen.append((event_name, {}))
                 elif line.startswith("data: ") and events_seen:
                     events_seen[-1] = (
                         events_seen[-1][0],
-                        json.loads(line[len("data: "):]),
+                        json.loads(line[len("data: ") :]),
                     )
 
     names = [name for name, _ in events_seen]
