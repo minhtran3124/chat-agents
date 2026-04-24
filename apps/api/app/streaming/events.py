@@ -2,6 +2,19 @@ import json
 from datetime import UTC, datetime
 from typing import Any, Literal
 
+ErrorReason = Literal["timeout", "internal"]
+FinalReportSource = Literal["stream", "file", "error"]
+
+ERROR_MESSAGES: dict[ErrorReason, str] = {
+    "timeout": (
+        "Research timed out. Please try again with a simpler question "
+        "or contact support if this persists."
+    ),
+    "internal": (
+        "Research failed due to an internal error. Please try again shortly."
+    ),
+}
+
 
 def _sse(event: str, data: dict) -> dict:
     return {"event": event, "data": json.dumps(data, default=str)}

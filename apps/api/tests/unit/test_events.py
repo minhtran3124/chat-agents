@@ -1,5 +1,14 @@
 import json
 
+import pytest
+
+from app.streaming import events
+from app.streaming.events import (
+    ERROR_MESSAGES,
+    ErrorReason,
+    FinalReportSource,
+)
+
 
 def test_stream_start_includes_thread_id_and_iso_timestamp():
     from app.streaming.events import stream_start
@@ -90,3 +99,30 @@ def test_reflection_logged_truncates_at_2000_chars():
     ev = reflection_logged("main", "x" * 5000)
     p = json.loads(ev["data"])
     assert len(p["reflection"]) == 2000
+
+
+# ---------------------------------------------------------------------------
+# Task 1.2 — ErrorReason, FinalReportSource, ERROR_MESSAGES
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_error_messages_catalog_covers_both_reasons():
+    assert set(ERROR_MESSAGES.keys()) == {"timeout", "internal"}
+    for reason, message in ERROR_MESSAGES.items():
+        assert isinstance(message, str)
+        assert len(message) > 10  # non-empty, human-readable
+
+
+@pytest.mark.unit
+def test_error_reason_type_alias_values():
+    from typing import get_args
+
+    assert set(get_args(ErrorReason)) == {"timeout", "internal"}
+
+
+@pytest.mark.unit
+def test_final_report_source_widened_to_include_error():
+    from typing import get_args
+
+    assert set(get_args(FinalReportSource)) == {"stream", "file", "error"}
