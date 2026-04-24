@@ -167,6 +167,9 @@ case "stream_end":
   //
   // DESIGN: see docs/superpowers/specs/2026-04-24-phase-0-stabilize-sse-contract-design.md §4.3
   if (data.final_report_source === "error") {
+    // status is already "error" (set by the preceding error event);
+    // this branch is intentionally a no-op beyond reflecting
+    // source="error" in state. Do NOT set status here.
     return { ...state, reportSource: "error" };
   }
   return {
@@ -203,7 +206,13 @@ case "stream_end":
 
 ### 5.1 Target generator body
 
+**Scope note**: `mapper` and `final_report_parts` are declared in the outer `research()` function (unchanged from current implementation), accessed as closures from the inner `generator()`. The snippet below focuses on the `generator()` body — the surrounding `research()` handler (prompt resolution, agent build, `EventSourceResponse` return) is unchanged.
+
 ```python
+# In outer research() function, unchanged:
+#     mapper = ChunkMapper()
+#     final_report_parts: list[str] = []
+
 async def generator() -> AsyncGenerator[dict, None]:
     logger.info(
         "[RESEARCH] Agent invoked thread_id=%s prompt_versions=%s question=%r",
@@ -421,11 +430,21 @@ and start a new empty `## [Unreleased]` section above it.
 
 ### 7.3 `/apps/api/.env.example` — new line
 
-Place near the other operational tunables (`VFS_OFFLOAD_THRESHOLD_TOKENS`, `COMPRESSION_DETECTION_RATIO`):
+Insert **immediately after line 12 (`COMPRESSION_DETECTION_RATIO=0.7`) and before line 13 (`CORS_ORIGINS=...`)** to keep the operational-tunables block contiguous:
 
 ```bash
 # Research endpoint timeout in seconds (10-3600, default 500)
 RESEARCH_TIMEOUT_S=500
+```
+
+The block after this edit reads:
+
+```bash
+CHECKPOINT_DB_PATH=./data/checkpoints.sqlite
+VFS_OFFLOAD_THRESHOLD_TOKENS=20000
+COMPRESSION_DETECTION_RATIO=0.7
+RESEARCH_TIMEOUT_S=500                      # ← new
+CORS_ORIGINS=["http://localhost:3000"]
 ```
 
 ## 8. Test plan
