@@ -76,6 +76,20 @@ and start a new empty `## [Unreleased]` section above it.
 - Bug fixes: `fix/<short-name>`
 - Docs: `docs/<short-name>`
 
+## Enabling tracing locally
+
+Add to `apps/api/.env`:
+
+```env
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=ls__...      # from smith.langchain.com → Settings → API Keys
+LANGCHAIN_PROJECT=chat-agents  # project name in LangSmith
+```
+
+The app re-exports these to `os.environ` at startup (same pattern as `ANTHROPIC_API_KEY`), so LangChain picks them up automatically. Tracing is disabled by default — omit `LANGCHAIN_TRACING_V2` or set it to `false`.
+
+Each `/research` trace carries `request_id`, `thread_id`, and `prompt_versions` metadata, and is tagged with the active `LLM_PROVIDER`. Supervisor + subagent spans nest under the top-level run automatically.
+
 ## Running Lint Locally Before Push
 
 ```bash
