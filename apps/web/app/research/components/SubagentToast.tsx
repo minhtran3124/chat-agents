@@ -15,13 +15,7 @@ export type ToastItem = {
  * The 400 ms exit animation piggybacks on the 5 s total TTL by starting
  * at 4.6 s so the visual exit is fully complete at 5 s.
  */
-function Toast({
-  item,
-  onDismiss,
-}: {
-  item: ToastItem;
-  onDismiss: (id: string) => void;
-}) {
+function Toast({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
@@ -48,9 +42,7 @@ function Toast({
             <span className="font-display text-sm font-semibold capitalize tracking-tight text-ink">
               {item.name}
             </span>
-            <span className="text-[9px] font-medium uppercase tracking-caps text-olive">
-              done
-            </span>
+            <span className="text-[9px] font-medium uppercase tracking-caps text-olive">done</span>
           </div>
           <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-subink">
             {item.task || "Finished research task."}

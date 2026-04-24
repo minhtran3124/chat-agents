@@ -1,7 +1,7 @@
 "use client";
 import { useReducer, useRef } from "react";
 import { consumeFrames, leftoverAfterFrames, SSEFrame } from "./sseParser";
-import { TodoItem, FileRef, SubagentRun, CompressionEvent } from "./types";
+import { TodoItem, FileRef, SubagentRun, CompressionEvent, Reflection } from "./types";
 
 function newThreadId(): string {
   return crypto.randomUUID();
@@ -14,6 +14,7 @@ export type ResearchState = {
   files: FileRef[];
   subagents: Record<string, SubagentRun>;
   compressions: CompressionEvent[];
+  reflections: Reflection[];
   report: string;
   reportSource: ReportSource | null;
   status: "idle" | "loading" | "streaming" | "done" | "error";
@@ -26,6 +27,7 @@ export const initial: ResearchState = {
   files: [],
   subagents: {},
   compressions: [],
+  reflections: [],
   report: "",
   reportSource: null,
   status: "idle",
@@ -60,6 +62,14 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
       };
     case "compression_triggered":
       return { ...state, compressions: [...state.compressions, data] };
+    case "reflection_logged":
+      return {
+        ...state,
+        reflections: [
+          ...state.reflections,
+          { role: data.role, reflection: data.reflection, at: Date.now() },
+        ],
+      };
     case "text_delta":
       return { ...state, report: state.report + data.content };
     case "error":
@@ -74,7 +84,7 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
         // as streamed.
         reportSource: data.final_report
           ? ((data.final_report_source as ReportSource | undefined) ?? "stream")
-          : state.reportSource ?? "stream",
+          : (state.reportSource ?? "stream"),
         // Mark any remaining pending/in_progress todos as completed — the
         // agent doesn't always re-call write_todos at the end of each step.
         todos: state.todos.map((t) =>

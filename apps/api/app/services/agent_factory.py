@@ -5,7 +5,7 @@ from deepagents import SubAgent, create_deep_agent
 from app.services.llm_factory import get_fast_llm, get_llm
 from app.services.search_tool import internet_search
 from app.stores.memory_store import get_checkpointer, get_store
-
+from app.tools.think_tool import think_tool
 
 
 def build_research_agent(
@@ -24,7 +24,7 @@ def build_research_agent(
                 "results, return 150-word summary with citations."
             ),
             system_prompt=researcher_prompt,
-            tools=[internet_search],
+            tools=[internet_search, think_tool],
             model=fast_llm,
         ),
         SubAgent(
@@ -41,7 +41,7 @@ def build_research_agent(
 
     return create_deep_agent(
         model=main_llm,
-        tools=[internet_search],
+        tools=[internet_search, think_tool],
         subagents=subagents,
         system_prompt=main_prompt,
         store=get_store(),

@@ -32,7 +32,7 @@ export function SubagentPanel({
               <div className="flex items-center gap-2">
                 <span
                   className={`h-2 w-2 flex-none rounded-full ${
-                    r.status === "running" ? "bg-terracotta animate-soft-pulse" : "bg-olive"
+                    r.status === "running" ? "animate-soft-pulse bg-terracotta" : "bg-olive"
                   }`}
                 />
                 <span className="font-display text-sm font-semibold capitalize tracking-tight text-ink">

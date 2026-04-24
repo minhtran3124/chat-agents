@@ -72,3 +72,21 @@ def test_compression_triggered_synthetic_flag_passes_through():
     ev = compression_triggered(40000, 20000, synthetic=True)
     p = json.loads(ev["data"])
     assert p["synthetic"] is True
+
+
+def test_reflection_logged_carries_role_and_text():
+    from app.streaming.events import reflection_logged
+
+    ev = reflection_logged("researcher", "need primary source on X")
+    assert ev["event"] == "reflection_logged"
+    p = json.loads(ev["data"])
+    assert p["role"] == "researcher"
+    assert p["reflection"] == "need primary source on X"
+
+
+def test_reflection_logged_truncates_at_2000_chars():
+    from app.streaming.events import reflection_logged
+
+    ev = reflection_logged("main", "x" * 5000)
+    p = json.loads(ev["data"])
+    assert len(p["reflection"]) == 2000

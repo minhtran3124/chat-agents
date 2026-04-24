@@ -6,13 +6,7 @@ type Status = "idle" | "loading" | "streaming" | "done" | "error";
  * visible through loading / streaming / done so the user can always
  * see what the current brief is answering.
  */
-export function AskedCard({
-  question,
-  status,
-}: {
-  question: string;
-  status: Status;
-}) {
+export function AskedCard({ question, status }: { question: string; status: Status }) {
   const dotClass =
     status === "loading"
       ? "bg-amber animate-soft-pulse"
@@ -35,10 +29,7 @@ export function AskedCard({
     <div className="animate-asked-slide border-b border-rule bg-cream px-8 py-4">
       <div className="flex items-start gap-4">
         <div className="mt-1 flex-none">
-          <span
-            className={`inline-block h-2 w-2 rounded-full ${dotClass}`}
-            aria-hidden
-          />
+          <span className={`inline-block h-2 w-2 rounded-full ${dotClass}`} aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-baseline gap-2">

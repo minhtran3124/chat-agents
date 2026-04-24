@@ -101,13 +101,13 @@ function Preparing() {
       <div className="w-full">
         <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-amber/10 px-3 py-1 text-[10px] font-medium uppercase tracking-caps text-amber">
           <span className="flex gap-1" aria-hidden>
-            <span className="h-1.5 w-1.5 rounded-full bg-amber animate-loading-dot" />
+            <span className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-amber" />
             <span
-              className="h-1.5 w-1.5 rounded-full bg-amber animate-loading-dot"
+              className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-amber"
               style={{ animationDelay: "0.18s" }}
             />
             <span
-              className="h-1.5 w-1.5 rounded-full bg-amber animate-loading-dot"
+              className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-amber"
               style={{ animationDelay: "0.36s" }}
             />
           </span>
@@ -119,8 +119,8 @@ function Preparing() {
         </h2>
 
         <p className="mt-5 max-w-lg text-base leading-relaxed text-subink">
-          Sketching a plan, summoning specialist researchers, and opening the
-          virtual filesystem. The brief will begin streaming here in a moment.
+          Sketching a plan, summoning specialist researchers, and opening the virtual filesystem.
+          The brief will begin streaming here in a moment.
         </p>
 
         <div className="mt-10 border-t border-rule pt-6">
@@ -135,7 +135,7 @@ function Preparing() {
                 style={{ animationDelay: `${i * 220}ms` }}
               >
                 <span
-                  className="h-1.5 w-1.5 rounded-full bg-amber animate-soft-pulse"
+                  className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-amber"
                   style={{ animationDelay: `${i * 220}ms` }}
                 />
                 <span className="font-medium text-ink/80">{step}</span>
@@ -156,12 +156,7 @@ function Preparing() {
 }
 
 function SkeletonLine({ width }: { width: string }) {
-  return (
-    <div
-      className="h-2.5 rounded-sm bg-rule/60 animate-skeleton-shimmer"
-      style={{ width }}
-    />
-  );
+  return <div className="animate-skeleton-shimmer h-2.5 rounded-sm bg-rule/60" style={{ width }} />;
 }
 
 function Welcome() {
@@ -173,9 +168,9 @@ function Welcome() {
           What would you like <span className="italic text-terracotta">researched?</span>
         </h2>
         <p className="mt-5 max-w-lg text-base leading-relaxed text-subink">
-          Type a question above. You&rsquo;ll watch the notebook sketch a plan, send
-          specialist researchers to dig in, save notes as they find them, and write
-          the brief here in real time &mdash; citations included.
+          Type a question above. You&rsquo;ll watch the notebook sketch a plan, send specialist
+          researchers to dig in, save notes as they find them, and write the brief here in real time
+          &mdash; citations included.
         </p>
         <div className="mt-10 border-t border-rule pt-5">
           <div className="mb-3 text-[10px] uppercase tracking-caps text-subink">Try asking</div>

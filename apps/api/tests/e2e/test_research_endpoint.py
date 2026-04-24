@@ -10,12 +10,49 @@ async def test_research_endpoint_streams_expected_event_sequence(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
 
+    from langchain_core.messages import AIMessage, ToolMessage
+
     async def fake_astream(*args, **kwargs):
+        # Todo tracker update
         yield ("updates", {"main": {"todos": [{"text": "step1", "status": "pending"}]}})
-        yield ("updates", {"researcher": {"task": "research X"}})
-        yield ("updates", {"researcher": {"summary": "done", "__end__": True}})
-        yield ("updates", {"critic": {"task": "review draft"}})
-        yield ("updates", {"critic": {"summary": "ok", "__end__": True}})
+        # Main agent spawns researcher subagent via the `task` tool
+        yield (
+            "updates",
+            {
+                "model": {
+                    "messages": [
+                        AIMessage(
+                            content="",
+                            tool_calls=[
+                                {
+                                    "name": "task",
+                                    "id": "call_research_1",
+                                    "args": {
+                                        "subagent_type": "researcher",
+                                        "description": "research X",
+                                    },
+                                }
+                            ],
+                        )
+                    ]
+                }
+            },
+        )
+        # Researcher returns via matching ToolMessage
+        yield (
+            "updates",
+            {
+                "tools": {
+                    "messages": [
+                        ToolMessage(
+                            content="researcher done",
+                            tool_call_id="call_research_1",
+                            name="task",
+                        )
+                    ]
+                }
+            },
+        )
 
     fake_agent = MagicMock()
     fake_agent.astream = fake_astream

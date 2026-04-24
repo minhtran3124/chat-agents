@@ -29,6 +29,7 @@ def test_get_llm_calls_init_chat_model_with_settings(monkeypatch):
         mock_init.assert_called_once_with(
             model="claude-sonnet-4-6",
             model_provider="anthropic",
+            streaming=True,
         )
 
 
@@ -41,6 +42,7 @@ def test_get_fast_llm_uses_haiku_for_anthropic(monkeypatch):
         mock_init.assert_called_once_with(
             model="claude-haiku-4-5",
             model_provider="anthropic",
+            streaming=True,
         )
 
 
@@ -53,4 +55,5 @@ def test_get_fast_llm_uses_gpt4o_mini_for_openai(monkeypatch):
         mock_init.assert_called_once_with(
             model="gpt-4o-mini",
             model_provider="openai",
+            streaming=True,
         )

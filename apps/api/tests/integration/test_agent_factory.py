@@ -42,7 +42,23 @@ async def test_build_research_agent_wires_subagents_and_store(monkeypatch):
     assert kwargs["system_prompt"]
     assert len(kwargs["subagents"]) == 2
     # SubAgent is a dict subclass — access fields via dict syntax
-    names = {sa["name"] for sa in kwargs["subagents"]}
-    assert names == {"researcher", "critic"}
+    subagents_by_name = {sa["name"]: sa for sa in kwargs["subagents"]}
+    assert set(subagents_by_name) == {"researcher", "critic"}
     assert kwargs["store"] is not None
     assert kwargs["checkpointer"] is not None
+
+    # think_tool must be bound on the main agent and the researcher subagent,
+    # but NOT on the critic (which doesn't search).
+    main_tool_names = {getattr(t, "name", None) for t in kwargs["tools"]}
+    assert "think_tool" in main_tool_names
+    assert "internet_search" in main_tool_names
+
+    researcher_tool_names = {
+        getattr(t, "name", None) for t in subagents_by_name["researcher"]["tools"]
+    }
+    assert "think_tool" in researcher_tool_names
+    assert "internet_search" in researcher_tool_names
+
+    critic_tools = subagents_by_name["critic"].get("tools") or []
+    critic_tool_names = {getattr(t, "name", None) for t in critic_tools}
+    assert "think_tool" not in critic_tool_names

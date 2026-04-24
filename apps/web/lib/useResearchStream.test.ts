@@ -119,6 +119,44 @@ describe("research reducer", () => {
     expect(s.todos.every((t) => t.status === "completed")).toBe(true);
   });
 
+  it("reflection_logged appends reflection with role and timestamp", () => {
+    const before = Date.now();
+    const s = reducer(initial, {
+      event: "reflection_logged",
+      data: { role: "main", reflection: "need a primary source on X" },
+    });
+    expect(s.reflections).toHaveLength(1);
+    expect(s.reflections[0].role).toBe("main");
+    expect(s.reflections[0].reflection).toBe("need a primary source on X");
+    expect(typeof s.reflections[0].at).toBe("number");
+    expect(s.reflections[0].at).toBeGreaterThanOrEqual(before);
+  });
+
+  it("multiple reflection_logged events accumulate in order", () => {
+    let s = reducer(initial, {
+      event: "reflection_logged",
+      data: { role: "main", reflection: "first" },
+    });
+    s = reducer(s, {
+      event: "reflection_logged",
+      data: { role: "researcher", reflection: "second" },
+    });
+    expect(s.reflections.map((r) => r.reflection)).toEqual(["first", "second"]);
+    expect(s.reflections.map((r) => r.role)).toEqual(["main", "researcher"]);
+  });
+
+  it("stream_start clears reflections from a previous run", () => {
+    const seeded = {
+      ...initial,
+      reflections: [{ role: "main" as const, reflection: "stale", at: 1 }],
+    };
+    const after = reducer(seeded, {
+      event: "stream_start",
+      data: { thread_id: "t", started_at: "now" },
+    });
+    expect(after.reflections).toEqual([]);
+  });
+
   it("unknown event is a no-op", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const s = reducer(initial, { event: "unknown_xyz", data: {} } as any);
