@@ -2,6 +2,7 @@
 import asyncio
 import json
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import structlog
 from fastapi import APIRouter, HTTPException
@@ -17,8 +18,6 @@ from app.streaming.events import ErrorReason, FinalReportSource
 
 log = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/research", tags=["research"])
-
 SYNTHETIC_COMPRESSION_THRESHOLD_TOKENS = 30_000
 
 # Fallback threshold: when the main agent streams fewer assistant-text
@@ -28,6 +27,22 @@ SYNTHETIC_COMPRESSION_THRESHOLD_TOKENS = 30_000
 # report and mark the source as "file" so the UI can flag it.
 MIN_STREAM_REPORT_CHARS = 200
 FALLBACK_DRAFT_FILENAME = "draft.md"
+
+
+def _extract_token_count(msg: Any) -> int:
+    """Read usage_metadata from an AIMessageChunk. Returns 0 if absent.
+
+    LangChain populates usage_metadata on the final chunk of each message
+    turn — the counter lags by at most one turn, acceptable for a budget
+    guard that only needs to catch overruns.
+    """
+    meta = getattr(msg, "usage_metadata", None)
+    if not meta:
+        return 0
+    return meta.get("input_tokens", 0) + meta.get("output_tokens", 0)
+
+
+router = APIRouter(prefix="/research", tags=["research"])
 
 
 @router.post("")
