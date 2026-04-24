@@ -36,6 +36,11 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
     versions_used = registry.resolve_versions(overrides)
     thread_id = payload.thread_id or "default-user"
 
+    structlog.contextvars.bind_contextvars(
+        thread_id=thread_id,
+        prompt_versions=versions_used,
+    )
+
     try:
         agent = build_research_agent(
             main_prompt=registry.get("main", version=versions_used["main"]),
@@ -47,6 +52,7 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
     mapper = ChunkMapper()
 
     async def generator() -> AsyncGenerator[dict, None]:
+        request_id = structlog.contextvars.get_contextvars().get("request_id", "")
         log.info(
             "research.invoked",
             question_preview=payload.question[:120],
@@ -62,7 +68,14 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
             async with asyncio.timeout(settings.RESEARCH_TIMEOUT_S):
                 async for mode, chunk in agent.astream(
                     {"messages": [{"role": "user", "content": payload.question}]},
-                    config={"configurable": {"thread_id": thread_id}},
+                    config={
+                        "configurable": {"thread_id": thread_id},
+                        "metadata": {
+                            "request_id": request_id,
+                            "prompt_versions": versions_used,
+                        },
+                        "tags": [settings.LLM_PROVIDER],
+                    },
                     stream_mode=["values", "messages", "updates"],
                 ):
                     async for ev in mapper.process(mode, chunk):
