@@ -577,9 +577,12 @@ Step 3 is the credibility check for the CHANGELOG "Fixed" bullet — CI cannot r
 **One-command rollback** is a primary design constraint:
 
 ```bash
+git checkout v1 && git pull github v1
 git revert <merge-commit-sha>
-git push origin main
+git push github v1
 ```
+
+(Base branch is `v1`, not `main` — `v1` is the active development line; `main` is a stable pointer and not updated by this PR.)
 
 Restores:
 - Original router generator (no timeout, error without stream_end).

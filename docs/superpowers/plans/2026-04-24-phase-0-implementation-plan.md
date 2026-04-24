@@ -12,7 +12,7 @@
 - Spec source: [`docs/superpowers/specs/2026-04-24-phase-0-stabilize-sse-contract-design.md`](../specs/2026-04-24-phase-0-stabilize-sse-contract-design.md)
 - GitHub: [Issue #2](https://github.com/minhtran3124/chat-agents/issues/2), [Milestone #1](https://github.com/minhtran3124/chat-agents/milestone/1)
 
-**Target branch:** `fix/phase-0-stabilize-sse-contract` off `main`
+**Target branch:** `fix/phase-0-stabilize-sse-contract` off `v1` (the active development line for this repo; `main` is not the base for current work)
 
 **Estimated total steps:** ~55, grouped into 12 tasks across 4 chunks. Each step is 2–5 min.
 
@@ -25,22 +25,24 @@
 **Files:**
 - Touch: none (git operations only)
 
-- [ ] **Step 0.1.1: Confirm you are on the repo root and branch `main` exists**
+- [ ] **Step 0.1.1: Confirm you are on the repo root and branch `v1` exists**
 
 Run from repo root `chat-agents/`:
 
 ```bash
 git rev-parse --show-toplevel
-git branch -a | grep -E '(^\*|main)'
+git branch -a | grep -E '(^\*|v1)'
 git remote -v
 ```
 
 Expected output:
 - First line prints the absolute repo path.
-- Second section lists `main` among local/remote branches.
+- Second section lists `v1` among local/remote branches.
 - Third section shows the remote name — this plan assumes it is **`github`** (as in `git@github.tranhuuminh3124.com:minhtran3124/chat-agents.git`). If your remote is `origin` or another name, substitute that name everywhere you see `github` in later git commands (Steps 0.1.3, 4.6.1, Appendix A).
 
-If `main` is not present locally, fetch it: `git fetch <remote> main:main`.
+**Important**: this repo's active development line is `v1`, not `main`. The implementation branch is created off `v1`, and the PR targets `v1`. `main` may be a stable/release pointer but is not the Phase 0 base.
+
+If `v1` is not present locally, fetch it: `git fetch <remote> v1:v1`.
 
 - [ ] **Step 0.1.2: Ensure working tree is clean for the spec/roadmap files**
 
@@ -55,15 +57,15 @@ If you see uncommitted changes on `apps/api/` or `apps/web/lib/` from a previous
 - [ ] **Step 0.1.3: Create and check out the implementation branch**
 
 ```bash
-git checkout main
-git pull github main
+git checkout v1
+git pull github v1
 git checkout -b fix/phase-0-stabilize-sse-contract
 git status
 ```
 
-Expected: `On branch fix/phase-0-stabilize-sse-contract` with a clean working tree.
+Expected: `On branch fix/phase-0-stabilize-sse-contract` with a clean working tree. The branch is now based on the latest tip of `v1`.
 
-- [ ] **Step 0.1.4: Verify backend test suite is currently green on `main`**
+- [ ] **Step 0.1.4: Verify backend test suite is currently green on `v1`'s tip**
 
 ```bash
 cd apps/api && pytest -q 2>&1 | tail -5
@@ -605,7 +607,7 @@ Expected: green across the board.
 - [ ] **Step 1.6.3: Confirm git log for Chunk 1**
 
 ```bash
-git log --oneline main..HEAD
+git log --oneline v1..HEAD
 ```
 
 Expected: 5 commits in the order feat(settings) → feat(ErrorReason catalog) → refactor(error factory) → feat(stream_end widen) → chore(remove memory_updated).
@@ -1035,7 +1037,7 @@ Expected: green.
 - [ ] **Step 2.3.3: Confirm Chunk 2 git history**
 
 ```bash
-git log --oneline main..HEAD
+git log --oneline v1..HEAD
 ```
 
 Expected: **7 commits total** across Chunks 1–2 — assuming Chunk 1 produced its canonical 5 commits (1 per task × tasks 1.1–1.5). If Chunk 1's commit count was different (e.g., you combined two tasks into one commit), adjust this check accordingly. The invariant is: two new commits since end-of-Chunk-1 (one for router refactor, one for e2e test).
@@ -1393,7 +1395,7 @@ Expected: **no output**.
 - [ ] **Step 3.3.3: Git history**
 
 ```bash
-git log --oneline main..HEAD
+git log --oneline v1..HEAD
 ```
 
 Expected: 9 commits total (5 Chunk 1 + 2 Chunk 2 + 2 Chunk 3).
@@ -1603,7 +1605,7 @@ git push -u <your-remote-name> fix/phase-0-stabilize-sse-contract
 
 ```bash
 gh pr create \
-  --base main \
+  --base v1 \
   --head fix/phase-0-stabilize-sse-contract \
   --title "fix(api,web): stabilize SSE contract + timeout + remove memory_updated" \
   --body "$(cat <<'EOF'
@@ -1705,7 +1707,7 @@ At this point the PR is reviewable. Do not merge until:
 - [ ] **Step 4.8.1: Count commits on the branch**
 
 ```bash
-git log --oneline main..HEAD | wc -l
+git log --oneline v1..HEAD | wc -l
 ```
 
 Expected: **10 commits** (5 Chunk 1 + 2 Chunk 2 + 2 Chunk 3 + 1 Chunk 4).
@@ -1734,9 +1736,9 @@ Expected: all green.
 If this PR needs to be reverted post-merge:
 
 ```bash
-git checkout main && git pull
+git checkout v1 && git pull github v1
 git revert <merge-commit-sha> --no-edit
-git push github main
+git push github v1
 ```
 
 No migrations, no env-var renames, no DB changes — the revert is side-effect free (per spec §10). Confirm post-revert via one happy-path smoke run.
