@@ -26,6 +26,15 @@ class Settings(BaseSettings):
     CHECKPOINT_DB_PATH: str = "./data/checkpoints.sqlite"
     VFS_OFFLOAD_THRESHOLD_TOKENS: int = 20_000
     COMPRESSION_DETECTION_RATIO: float = 0.7
+    RESEARCH_TIMEOUT_S: int = Field(
+        default=500,
+        ge=10,
+        le=3600,
+        description=(
+            "Maximum wall-clock seconds for a single /research run before "
+            "asyncio.timeout cancels it and emits a timeout error."
+        ),
+    )
 
     LOG_LEVEL: str = "INFO"
 
