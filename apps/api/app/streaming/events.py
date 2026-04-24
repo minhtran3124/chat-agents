@@ -72,10 +72,6 @@ def text_delta(content: str) -> dict:
     return _sse("text_delta", {"content": content})
 
 
-def memory_updated(namespace: str, key: str) -> dict:
-    return _sse("memory_updated", {"namespace": namespace, "key": key})
-
-
 def reflection_logged(role: Literal["main", "researcher"], reflection: str) -> dict:
     return _sse("reflection_logged", {"role": role, "reflection": reflection[:2000]})
 
