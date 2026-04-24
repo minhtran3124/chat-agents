@@ -9,24 +9,6 @@ Demo project showcasing the **5 built-in capabilities** of [LangChain Deep Agent
 
 Each capability is **observable on a live dashboard** rather than buried in logs.
 
-## Screenshots
-
-**Full dashboard** — question submitted, plan active, researchers working, welcome screen before first input:
-
-![Dashboard overview](./docs/screenshots/dashboard.png)
-
-**Plan** — 3 / 3 sub-topics completed with strikethrough styling once research finishes:
-
-![Plan completed](./docs/screenshots/plan.png)
-
-**Researchers** — each specialist shown with task description and summary once done:
-
-![Researchers panel](./docs/screenshots/researchers.png)
-
-**Notes & sources** — virtual filesystem files saved by researchers, with token counts:
-
-![Files panel](./docs/screenshots/files.png)
-
 ## Repository Layout
 
 ```
