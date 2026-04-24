@@ -80,8 +80,12 @@ def reflection_logged(role: Literal["main", "researcher"], reflection: str) -> d
     return _sse("reflection_logged", {"role": role, "reflection": reflection[:2000]})
 
 
-def error(message: str, recoverable: bool = False) -> dict:
-    return _sse("error", {"message": message, "recoverable": recoverable})
+def error(reason: ErrorReason) -> dict:
+    return _sse("error", {
+        "message": ERROR_MESSAGES[reason],
+        "reason": reason,
+        "recoverable": reason == "timeout",
+    })
 
 
 def stream_end(

@@ -37,12 +37,6 @@ def test_text_delta_passes_content():
     assert json.loads(ev["data"])["content"] == "hello"
 
 
-def test_error_default_recoverable_false():
-    from app.streaming.events import error
-
-    ev = error("boom")
-    assert json.loads(ev["data"])["recoverable"] is False
-
 
 def test_stream_end_carries_final_report_and_usage():
     from app.streaming.events import stream_end
@@ -126,3 +120,28 @@ def test_final_report_source_widened_to_include_error():
     from typing import get_args
 
     assert set(get_args(FinalReportSource)) == {"stream", "file", "error"}
+
+
+# ---------------------------------------------------------------------------
+# Task 1.3 — refactored error() factory
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_error_factory_timeout_shape():
+    ev = events.error("timeout")
+    assert ev["event"] == "error"
+    data = json.loads(ev["data"])
+    assert data["reason"] == "timeout"
+    assert data["recoverable"] is True
+    assert data["message"] == ERROR_MESSAGES["timeout"]
+
+
+@pytest.mark.unit
+def test_error_factory_internal_shape():
+    ev = events.error("internal")
+    assert ev["event"] == "error"
+    data = json.loads(ev["data"])
+    assert data["reason"] == "internal"
+    assert data["recoverable"] is False
+    assert data["message"] == ERROR_MESSAGES["internal"]
