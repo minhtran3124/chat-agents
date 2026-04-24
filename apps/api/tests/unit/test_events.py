@@ -101,7 +101,7 @@ def test_reflection_logged_truncates_at_2000_chars():
 
 @pytest.mark.unit
 def test_error_messages_catalog_covers_both_reasons():
-    assert set(ERROR_MESSAGES.keys()) == {"timeout", "internal"}
+    assert set(ERROR_MESSAGES.keys()) == {"timeout", "internal", "rate_limited"}
     for _reason, message in ERROR_MESSAGES.items():
         assert isinstance(message, str)
         assert len(message) > 10  # non-empty, human-readable
@@ -111,7 +111,7 @@ def test_error_messages_catalog_covers_both_reasons():
 def test_error_reason_type_alias_values():
     from typing import get_args
 
-    assert set(get_args(ErrorReason)) == {"timeout", "internal"}
+    assert set(get_args(ErrorReason)) == {"timeout", "internal", "rate_limited"}
 
 
 @pytest.mark.unit

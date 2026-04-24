@@ -99,13 +99,22 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
             )
             error_reason = "timeout"
             yield events.error("timeout")
-        except Exception:
-            logger.error(
-                "[RESEARCH] Stream error — agent run abandoned:\n%s",
-                traceback.format_exc(),
-            )
-            error_reason = "internal"
-            yield events.error("internal")
+        except Exception as exc:
+            if type(exc).__name__ == "RateLimitError":
+                logger.warning(
+                    "[RESEARCH] Rate limit hit thread_id=%s: %s",
+                    thread_id,
+                    exc,
+                )
+                error_reason = "rate_limited"
+                yield events.error("rate_limited")
+            else:
+                logger.error(
+                    "[RESEARCH] Stream error — agent run abandoned:\n%s",
+                    traceback.format_exc(),
+                )
+                error_reason = "internal"
+                yield events.error("internal")
         finally:
             if error_reason is not None:
                 yield events.stream_end(

@@ -2,7 +2,7 @@ import json
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-ErrorReason = Literal["timeout", "internal"]
+ErrorReason = Literal["timeout", "internal", "rate_limited"]
 FinalReportSource = Literal["stream", "file", "error"]
 
 ERROR_MESSAGES: dict[ErrorReason, str] = {
@@ -11,6 +11,9 @@ ERROR_MESSAGES: dict[ErrorReason, str] = {
         "or contact support if this persists."
     ),
     "internal": ("Research failed due to an internal error. Please try again shortly."),
+    "rate_limited": (
+        "The AI provider is temporarily rate-limited. Wait 30 seconds and try again."
+    ),
 }
 
 
