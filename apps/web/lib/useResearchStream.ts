@@ -1,13 +1,13 @@
 "use client";
 import { useReducer, useRef } from "react";
 import { consumeFrames, leftoverAfterFrames, SSEFrame } from "./sseParser";
-import { TodoItem, FileRef, SubagentRun, CompressionEvent, Reflection } from "./types";
+import { TodoItem, FileRef, SubagentRun, CompressionEvent, Reflection, ErrorReason } from "./types";
 
 function newThreadId(): string {
   return crypto.randomUUID();
 }
 
-export type ReportSource = "stream" | "file";
+export type ReportSource = "stream" | "file" | "error";
 
 export type ResearchState = {
   todos: TodoItem[];
@@ -20,6 +20,8 @@ export type ResearchState = {
   status: "idle" | "loading" | "streaming" | "done" | "error";
   question?: string;
   error?: string;
+  errorReason?: ErrorReason;
+  errorRecoverable?: boolean;
 };
 
 export const initial: ResearchState = {
@@ -73,8 +75,22 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
     case "text_delta":
       return { ...state, report: state.report + data.content };
     case "error":
-      return { ...state, status: "error", error: data.message };
+      return {
+        ...state,
+        status: "error",
+        error: data.message,
+        errorReason: data.reason,
+        errorRecoverable: data.recoverable,
+      };
     case "stream_end":
+      // Error path: `error` event already set status:"error". stream_end is
+      // just the terminal signal — freeze partial state, do NOT flip to "done",
+      // do NOT force-complete todos.
+      //
+      // DESIGN: see docs/superpowers/specs/2026-04-24-phase-0-stabilize-sse-contract-design.md §4.3
+      if (data.final_report_source === "error") {
+        return { ...state, reportSource: "error" };
+      }
       return {
         ...state,
         status: "done",

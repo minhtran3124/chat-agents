@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { reducer, initial } from "./useResearchStream";
+import type { SSEFrame } from "./sseParser";
 
 describe("research reducer", () => {
   it("stream_start resets to streaming state", () => {
@@ -161,5 +162,92 @@ describe("research reducer", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const s = reducer(initial, { event: "unknown_xyz", data: {} } as any);
     expect(s).toBe(initial);
+  });
+});
+
+describe("useResearchStream reducer — error event", () => {
+  it("stores reason and recoverable when error event arrives", () => {
+    const frame: SSEFrame = {
+      event: "error",
+      data: {
+        message: "Research timed out. Please try again.",
+        reason: "timeout",
+        recoverable: true,
+      },
+    };
+    const next = reducer(initial, frame);
+    expect(next.status).toBe("error");
+    expect(next.error).toBe("Research timed out. Please try again.");
+    expect(next.errorReason).toBe("timeout");
+    expect(next.errorRecoverable).toBe(true);
+  });
+});
+
+describe("useResearchStream reducer — stream_end after error", () => {
+  it("preserves status:'error' when stream_end arrives with source='error'", () => {
+    // DESIGN: Per spec §4.3, stream_end with final_report_source:"error"
+    // must be a no-op beyond reflecting source — the preceding error event
+    // already set status:"error". Removing this branch breaks the contract
+    // guarantee in spec §4.4.
+    const afterError = reducer(initial, {
+      event: "error",
+      data: { message: "boom", reason: "internal", recoverable: false },
+    } as SSEFrame);
+
+    const afterEnd = reducer(afterError, {
+      event: "stream_end",
+      data: {
+        final_report: "",
+        usage: {},
+        versions_used: {},
+        final_report_source: "error",
+      },
+    } as SSEFrame);
+
+    expect(afterEnd.status).toBe("error");
+    expect(afterEnd.reportSource).toBe("error");
+    expect(afterEnd.error).toBe("boom");
+    expect(afterEnd.todos).toEqual(afterError.todos);
+    expect(afterEnd.files).toEqual(afterError.files);
+    expect(afterEnd.subagents).toEqual(afterError.subagents);
+  });
+});
+
+describe("useResearchStream reducer — stream_end success path", () => {
+  it("transitions to done and finalizes todos when source='stream'", () => {
+    const withTodos = reducer(initial, {
+      event: "todo_updated",
+      data: { items: [{ content: "one", status: "in_progress" }] },
+    } as SSEFrame);
+
+    const afterEnd = reducer(withTodos, {
+      event: "stream_end",
+      data: {
+        final_report: "THE REPORT",
+        usage: {},
+        versions_used: {},
+        final_report_source: "stream",
+      },
+    } as SSEFrame);
+
+    expect(afterEnd.status).toBe("done");
+    expect(afterEnd.report).toBe("THE REPORT");
+    expect(afterEnd.reportSource).toBe("stream");
+    expect(afterEnd.todos[0].status).toBe("completed");
+  });
+
+  it("reflects source='file' when fallback draft was used", () => {
+    const afterEnd = reducer(initial, {
+      event: "stream_end",
+      data: {
+        final_report: "FROM DRAFT",
+        usage: {},
+        versions_used: {},
+        final_report_source: "file",
+      },
+    } as SSEFrame);
+
+    expect(afterEnd.status).toBe("done");
+    expect(afterEnd.reportSource).toBe("file");
   });
 });

@@ -2,6 +2,19 @@ import json
 from datetime import UTC, datetime
 from typing import Any, Literal
 
+ErrorReason = Literal["timeout", "internal"]
+FinalReportSource = Literal["stream", "file", "error"]
+
+ERROR_MESSAGES: dict[ErrorReason, str] = {
+    "timeout": (
+        "Research timed out. Please try again with a simpler question "
+        "or contact support if this persists."
+    ),
+    "internal": (
+        "Research failed due to an internal error. Please try again shortly."
+    ),
+}
+
 
 def _sse(event: str, data: dict) -> dict:
     return {"event": event, "data": json.dumps(data, default=str)}
@@ -59,23 +72,23 @@ def text_delta(content: str) -> dict:
     return _sse("text_delta", {"content": content})
 
 
-def memory_updated(namespace: str, key: str) -> dict:
-    return _sse("memory_updated", {"namespace": namespace, "key": key})
-
-
 def reflection_logged(role: Literal["main", "researcher"], reflection: str) -> dict:
     return _sse("reflection_logged", {"role": role, "reflection": reflection[:2000]})
 
 
-def error(message: str, recoverable: bool = False) -> dict:
-    return _sse("error", {"message": message, "recoverable": recoverable})
+def error(reason: ErrorReason) -> dict:
+    return _sse("error", {
+        "message": ERROR_MESSAGES[reason],
+        "reason": reason,
+        "recoverable": reason == "timeout",
+    })
 
 
 def stream_end(
     final_report: str,
     usage: dict[str, Any],
     versions_used: dict[str, str],
-    final_report_source: Literal["stream", "file"] = "stream",
+    final_report_source: FinalReportSource = "stream",
 ) -> dict:
     return _sse(
         "stream_end",

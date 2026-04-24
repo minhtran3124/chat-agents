@@ -1,5 +1,6 @@
 # apps/api/tests/unit/test_research_router.py
 """Unit tests for /research router — prompt version resolution and stream_end payload."""
+
 import json
 from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -7,7 +8,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.config.settings import settings as app_settings
 from app.main import app
+from app.schemas.research import ResearchRequest
+from tests.conftest import collect_sse_events
 
 
 def _make_mock_agent(
@@ -20,6 +24,7 @@ def _make_mock_agent(
     ``.values`` is that dict (used to simulate a populated virtual FS for the
     final-report fallback path).
     """
+
     async def _astream(*args, **kwargs) -> AsyncGenerator:
         for item in stream_events:
             yield item
@@ -66,9 +71,7 @@ async def test_stream_end_contains_versions_used():
         mock_registry.resolve_versions.return_value = mock_versions
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/research",
                 json={"question": "What is LangGraph?"},
@@ -96,9 +99,7 @@ async def test_per_request_override_takes_precedence():
         mock_registry.resolve_versions.return_value = override_resolved
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/research",
                 json={"question": "test", "prompt_versions": {"main": "v2"}},
@@ -143,9 +144,7 @@ async def test_stream_end_falls_back_to_draft_when_stream_is_thin():
         mock_registry.resolve_versions.return_value = mock_versions
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/research", json={"question": "Question?"})
 
     assert response.status_code == 200
@@ -179,13 +178,13 @@ async def test_stream_end_prefers_stream_when_report_is_long_enough():
         patch("app.routers.research.build_research_agent", return_value=mock_agent),
     ):
         mock_registry.resolve_versions.return_value = {
-            "main": "v2", "researcher": "v1", "critic": "v1",
+            "main": "v2",
+            "researcher": "v1",
+            "critic": "v1",
         }
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/research", json={"question": "Question?"})
 
     events = _parse_sse(response.text)
@@ -193,3 +192,119 @@ async def test_stream_end_prefers_stream_when_report_is_long_enough():
     assert stream_end_ev is not None
     assert stream_end_ev["data"]["final_report"] == long_text
     assert stream_end_ev["data"]["final_report_source"] == "stream"
+
+
+# ---------------------------------------------------------------------------
+# Direct-handler tests (no HTTP layer) — test terminal-path stream_end guarantee
+# ---------------------------------------------------------------------------
+
+
+def _mock_registry():
+    mock = MagicMock()
+    mock.resolve_versions.return_value = {"main": "v1", "researcher": "v1", "critic": "v1"}
+    mock.get.return_value = "mock prompt"
+    return mock
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generator_emits_stream_end_on_internal_exception(
+    failing_agent_factory,
+    monkeypatch,
+):
+    """Per spec §4.4: uncaught exception must produce error{reason:internal} then stream_end{source:error}."""
+    from app.routers.research import research as research_handler
+
+    agent = failing_agent_factory(RuntimeError("boom"))
+    monkeypatch.setattr("app.routers.research.build_research_agent", lambda **kw: agent)
+    monkeypatch.setattr("app.routers.research.registry", _mock_registry())
+
+    payload = ResearchRequest(question="anything")
+    resp = await research_handler(payload)
+    collected = await collect_sse_events(resp)
+
+    event_names = [e["event"] for e in collected]
+    assert event_names[0] == "stream_start"
+    assert "error" in event_names
+    assert event_names[-1] == "stream_end"
+
+    error_ev = next(e for e in collected if e["event"] == "error")
+    error_data = json.loads(error_ev["data"])
+    assert error_data["reason"] == "internal"
+    assert error_data["recoverable"] is False
+
+    end_ev = collected[-1]
+    end_data = json.loads(end_ev["data"])
+    assert end_data["final_report_source"] == "error"
+    assert end_data["final_report"] == ""
+
+    assert event_names.index("error") < event_names.index("stream_end")
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generator_emits_stream_end_on_timeout(
+    slow_agent_factory,
+    monkeypatch,
+):
+    """Per spec §4.4: timeout must produce error{reason:timeout,recoverable:True} then stream_end{source:error}."""
+    from app.routers.research import research as research_handler
+
+    monkeypatch.setattr(app_settings, "RESEARCH_TIMEOUT_S", 0.05)
+    agent = slow_agent_factory(sleep_s=10)
+    monkeypatch.setattr("app.routers.research.build_research_agent", lambda **kw: agent)
+    monkeypatch.setattr("app.routers.research.registry", _mock_registry())
+
+    payload = ResearchRequest(question="anything")
+    resp = await research_handler(payload)
+    collected = await collect_sse_events(resp)
+
+    event_names = [e["event"] for e in collected]
+    assert event_names[0] == "stream_start"
+    assert event_names[-1] == "stream_end"
+
+    error_ev = next(e for e in collected if e["event"] == "error")
+    error_data = json.loads(error_ev["data"])
+    assert error_data["reason"] == "timeout"
+    assert error_data["recoverable"] is True
+
+    end_data = json.loads(collected[-1]["data"])
+    assert end_data["final_report_source"] == "error"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generator_success_path_no_error_event(
+    monkeypatch,
+):
+    """Regression guard: success stream_end must have source='stream' and NO error event."""
+    from langchain_core.messages import AIMessageChunk
+
+    from app.routers.research import research as research_handler
+
+    long_text = "Streamed report content. " * 20  # > MIN_STREAM_REPORT_CHARS (200)
+    streamed_chunk = AIMessageChunk(content=long_text)
+    stream_events_list = [("messages", (streamed_chunk, {}))]
+
+    class _OkAgent:
+        async def astream(self, *_args, **_kwargs):
+            for item in stream_events_list:
+                yield item
+
+        async def aget_state(self, *_args, **_kwargs):
+            return None
+
+    monkeypatch.setattr("app.routers.research.build_research_agent", lambda **kw: _OkAgent())
+    monkeypatch.setattr("app.routers.research.registry", _mock_registry())
+
+    payload = ResearchRequest(question="hello")
+    resp = await research_handler(payload)
+    collected = await collect_sse_events(resp)
+
+    event_names = [e["event"] for e in collected]
+    assert "error" not in event_names
+    assert event_names[-1] == "stream_end"
+
+    end_data = json.loads(collected[-1]["data"])
+    assert end_data["final_report_source"] == "stream"
+    assert len(end_data["final_report"]) >= 200

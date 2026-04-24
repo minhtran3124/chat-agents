@@ -2,7 +2,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Status = "idle" | "loading" | "streaming" | "done" | "error";
-type Source = "stream" | "file" | null;
+type Source = "stream" | "file" | "error" | null;
 
 /**
  * Normalise agent output before handing it to react-markdown.

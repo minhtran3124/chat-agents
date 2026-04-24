@@ -21,6 +21,9 @@ export type Reflection = {
   at: number;
 };
 
+export type ErrorReason = "timeout" | "internal";
+export type FinalReportSource = "stream" | "file" | "error";
+
 export type SSEEventMap = {
   stream_start: { thread_id: string; started_at: string };
   todo_updated: { items: TodoItem[] };
@@ -29,13 +32,12 @@ export type SSEEventMap = {
   subagent_completed: { id: string; summary: string };
   compression_triggered: CompressionEvent;
   text_delta: { content: string };
-  memory_updated: { namespace: string; key: string };
   reflection_logged: { role: ReflectionRole; reflection: string };
-  error: { message: string; recoverable: boolean };
+  error: { message: string; reason: ErrorReason; recoverable: boolean };
   stream_end: {
     final_report: string;
     usage: Record<string, unknown>;
     versions_used: Record<string, string>;
-    final_report_source?: "stream" | "file";
+    final_report_source?: FinalReportSource;
   };
 };

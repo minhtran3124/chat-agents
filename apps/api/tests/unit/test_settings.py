@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 
+@pytest.mark.unit
 def test_anthropic_provider_with_key_resolves_default_model(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "anthropic")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
@@ -15,6 +16,7 @@ def test_anthropic_provider_with_key_resolves_default_model(monkeypatch):
     assert s.LLM_MODEL == "claude-sonnet-4-6"
 
 
+@pytest.mark.unit
 def test_openai_provider_resolves_correct_default(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "openai")
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
@@ -27,6 +29,7 @@ def test_openai_provider_resolves_correct_default(monkeypatch):
     assert s.LLM_MODEL == "gpt-4o"
 
 
+@pytest.mark.unit
 def test_missing_provider_key_raises(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "openai")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
@@ -40,6 +43,7 @@ def test_missing_provider_key_raises(monkeypatch):
         Settings(_env_file=None)
 
 
+@pytest.mark.unit
 def test_missing_tavily_key_raises(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "anthropic")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
@@ -51,6 +55,7 @@ def test_missing_tavily_key_raises(monkeypatch):
         Settings(_env_file=None)
 
 
+@pytest.mark.unit
 def test_explicit_llm_model_is_preserved(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "anthropic")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
@@ -61,3 +66,41 @@ def test_explicit_llm_model_is_preserved(monkeypatch):
 
     s = Settings()
     assert s.LLM_MODEL == "claude-haiku-4-5"
+
+
+@pytest.mark.unit
+def test_research_timeout_s_rejects_below_minimum(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+
+    from app.config.settings import Settings
+
+    with pytest.raises(ValidationError) as exc:
+        Settings(_env_file=None, RESEARCH_TIMEOUT_S=5)
+    assert "RESEARCH_TIMEOUT_S" in str(exc.value)
+
+
+@pytest.mark.unit
+def test_research_timeout_s_rejects_above_maximum(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+
+    from app.config.settings import Settings
+
+    with pytest.raises(ValidationError) as exc:
+        Settings(_env_file=None, RESEARCH_TIMEOUT_S=7200)
+    assert "RESEARCH_TIMEOUT_S" in str(exc.value)
+
+
+@pytest.mark.unit
+def test_research_timeout_s_default_is_500(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+
+    from app.config.settings import Settings
+
+    s = Settings(_env_file=None)
+    assert s.RESEARCH_TIMEOUT_S == 500

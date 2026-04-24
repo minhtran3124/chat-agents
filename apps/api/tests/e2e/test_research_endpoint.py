@@ -1,3 +1,4 @@
+import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -114,3 +115,52 @@ async def test_synthetic_compression_emitted_when_no_real_compression(monkeypatc
             ]
 
     assert "compression_triggered" in seen_events
+
+
+@pytest.mark.e2e
+@pytest.mark.asyncio
+async def test_research_timeout_produces_error_and_stream_end(
+    slow_agent_factory,
+    monkeypatch,
+):
+    """DESIGN: Full HTTP path — a slow agent should trigger timeout,
+    producing error{reason:timeout} followed by stream_end{source:error}."""
+    import app.config.settings as settings_mod
+
+    monkeypatch.setattr(settings_mod.settings, "RESEARCH_TIMEOUT_S", 0.05)
+
+    agent = slow_agent_factory(sleep_s=10)
+    with patch("app.routers.research.build_research_agent", return_value=agent):
+        from app.main import app
+
+        events_seen: list[tuple[str, dict]] = []
+        async with (
+            AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
+            client.stream(
+                "POST",
+                "/research",
+                json={"question": "anything"},
+            ) as resp,
+        ):
+            assert resp.status_code == 200
+            async for line in resp.aiter_lines():
+                if line.startswith("event: "):
+                    event_name = line[len("event: "):].strip()
+                    events_seen.append((event_name, {}))
+                elif line.startswith("data: ") and events_seen:
+                    events_seen[-1] = (
+                        events_seen[-1][0],
+                        json.loads(line[len("data: "):]),
+                    )
+
+    names = [name for name, _ in events_seen]
+    assert names[0] == "stream_start"
+    assert "error" in names
+    assert names[-1] == "stream_end"
+
+    error_data = next(data for name, data in events_seen if name == "error")
+    assert error_data["reason"] == "timeout"
+    assert error_data["recoverable"] is True
+
+    end_data = events_seen[-1][1]
+    assert end_data["final_report_source"] == "error"

@@ -1,5 +1,14 @@
 import json
 
+import pytest
+
+from app.streaming import events
+from app.streaming.events import (
+    ERROR_MESSAGES,
+    ErrorReason,
+    FinalReportSource,
+)
+
 
 def test_stream_start_includes_thread_id_and_iso_timestamp():
     from app.streaming.events import stream_start
@@ -27,12 +36,6 @@ def test_text_delta_passes_content():
     assert ev["event"] == "text_delta"
     assert json.loads(ev["data"])["content"] == "hello"
 
-
-def test_error_default_recoverable_false():
-    from app.streaming.events import error
-
-    ev = error("boom")
-    assert json.loads(ev["data"])["recoverable"] is False
 
 
 def test_stream_end_carries_final_report_and_usage():
@@ -90,3 +93,74 @@ def test_reflection_logged_truncates_at_2000_chars():
     ev = reflection_logged("main", "x" * 5000)
     p = json.loads(ev["data"])
     assert len(p["reflection"]) == 2000
+
+
+# ---------------------------------------------------------------------------
+# Task 1.2 — ErrorReason, FinalReportSource, ERROR_MESSAGES
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_error_messages_catalog_covers_both_reasons():
+    assert set(ERROR_MESSAGES.keys()) == {"timeout", "internal"}
+    for _reason, message in ERROR_MESSAGES.items():
+        assert isinstance(message, str)
+        assert len(message) > 10  # non-empty, human-readable
+
+
+@pytest.mark.unit
+def test_error_reason_type_alias_values():
+    from typing import get_args
+
+    assert set(get_args(ErrorReason)) == {"timeout", "internal"}
+
+
+@pytest.mark.unit
+def test_final_report_source_widened_to_include_error():
+    from typing import get_args
+
+    assert set(get_args(FinalReportSource)) == {"stream", "file", "error"}
+
+
+# ---------------------------------------------------------------------------
+# Task 1.3 — refactored error() factory
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_error_factory_timeout_shape():
+    ev = events.error("timeout")
+    assert ev["event"] == "error"
+    data = json.loads(ev["data"])
+    assert data["reason"] == "timeout"
+    assert data["recoverable"] is True
+    assert data["message"] == ERROR_MESSAGES["timeout"]
+
+
+@pytest.mark.unit
+def test_error_factory_internal_shape():
+    ev = events.error("internal")
+    assert ev["event"] == "error"
+    data = json.loads(ev["data"])
+    assert data["reason"] == "internal"
+    assert data["recoverable"] is False
+    assert data["message"] == ERROR_MESSAGES["internal"]
+
+
+# ---------------------------------------------------------------------------
+# Task 1.4 — widen stream_end() final_report_source
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_stream_end_accepts_error_as_final_report_source():
+    ev = events.stream_end(
+        final_report="",
+        usage={},
+        versions_used={"main": "v3"},
+        final_report_source="error",
+    )
+    assert ev["event"] == "stream_end"
+    data = json.loads(ev["data"])
+    assert data["final_report_source"] == "error"
+    assert data["final_report"] == ""
