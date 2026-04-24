@@ -50,6 +50,26 @@ Examples:
 - `fix(web): SSE parser handles multi-line data correctly`
 - `docs: update demo verification checklist`
 
+## Changelog
+
+Every PR that changes user-visible behavior updates `/CHANGELOG.md`'s
+`[Unreleased]` section. Use the [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/)
+subhead convention:
+
+- **Added** — new features, new events, new settings, new files.
+- **Changed** — existing behavior changed in a backward-incompatible or
+  observable way.
+- **Deprecated** — features marked for removal in a future release.
+- **Removed** — features removed in this change.
+- **Fixed** — bug fixes.
+- **Security** — vulnerability fixes.
+
+Pure internal refactors (no user-visible or operator-visible effect) can
+skip the changelog. When in doubt, add an entry — it's cheap.
+
+When a release is cut, rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`,
+and start a new empty `## [Unreleased]` section above it.
+
 ## Branch Naming
 
 - Feature branches: `feat/<short-name>` e.g. `feat/research-dashboard`
