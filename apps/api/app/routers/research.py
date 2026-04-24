@@ -98,7 +98,12 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
                     stream_mode=["values", "messages", "updates"],
                 ):
                     if mode == "messages":
-                        # chunk is (AIMessageChunk, metadata_dict) in messages mode
+                        # chunk is (AIMessageChunk, metadata_dict) in messages mode.
+                        # The guard runs BEFORE mapper.process so no further
+                        # tokens are billed — usage_metadata arrives on the final
+                        # chunk of a turn, so any text_delta for that same chunk
+                        # is dropped. Intentional trade-off: abort at overage
+                        # rather than absorb one more turn's worth of tokens.
                         cumulative_tokens += _extract_token_count(chunk[0])
                         if cumulative_tokens > settings.MAX_TOKENS_PER_RUN:
                             log.warning(
