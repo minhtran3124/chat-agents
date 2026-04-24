@@ -33,8 +33,6 @@ export default function ResearchPage() {
     }
   }, [state.subagents]);
 
-  // Clear toast bookkeeping when the user resets — otherwise a fresh run
-  // of the same researcher id would be silently suppressed.
   useEffect(() => {
     if (state.status === "idle") {
       notifiedRef.current.clear();
@@ -47,24 +45,24 @@ export default function ResearchPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-cream text-ink">
-      <header className="flex items-start justify-between gap-6 border-b border-rule px-8 pb-5 pt-7">
-        <div>
-          <div className="mb-1 text-[10px] font-medium uppercase tracking-caps text-subink">
-            Deep research
+    <div className="flex h-screen flex-col bg-canvas text-ink">
+      <header className="flex items-center justify-between gap-6 border-b border-hairline px-8 py-4">
+        <div className="flex items-center gap-3">
+          <JournalMark />
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-[15px] font-semibold tracking-tight text-ink">
+              Research Journal
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-caps text-ink-dim">
+              Deep research
+            </span>
           </div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
-            Research Notebook
-          </h1>
-          <p className="mt-1 max-w-xl text-sm leading-snug text-subink">
-            Ask a question. Watch a plan form, researchers dig in, and a brief writes itself.
-          </p>
         </div>
         <div className="flex items-center gap-3">
           {state.status !== "idle" && (
             <button
               onClick={reset}
-              className="rounded-sm border border-rule bg-paper px-4 py-2 font-display text-sm font-medium text-subink transition hover:border-terracotta hover:text-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+              className="rounded-md border border-hairline bg-canvas px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-caps text-ink-muted transition hover:border-accent/40 hover:text-accent-deep focus:outline-none focus:ring-2 focus:ring-accent/30"
             >
               New research
             </button>
@@ -86,19 +84,19 @@ export default function ResearchPage() {
       {loading && <div className="loading-bar" aria-hidden />}
 
       <main className="flex min-h-0 flex-1">
-        <aside className="w-96 flex-shrink-0 overflow-y-auto border-r border-rule bg-paper/30">
+        <aside className="scrollbar-quiet w-[360px] flex-shrink-0 overflow-y-auto border-r border-hairline bg-surface/50">
           <TodoList items={state.todos} />
           <SubagentPanel runs={state.subagents} compressions={state.compressions} />
           <ReflectionPanel reflections={state.reflections} />
           <FileList files={state.files} />
         </aside>
-        <section className="min-w-0 flex-1 overflow-y-auto">
+        <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto">
           <ReportView text={state.report} status={state.status} source={state.reportSource} />
         </section>
       </main>
 
       {state.error && (
-        <div className="border-t border-rule bg-[#f6e3df] px-6 py-3 text-sm text-danger">
+        <div className="border-t border-danger/30 bg-danger/5 px-6 py-3 text-sm text-danger">
           <span className="mr-2 font-medium">Something went wrong.</span>
           {state.error}
         </div>
@@ -106,5 +104,30 @@ export default function ResearchPage() {
 
       <ToastStack items={toasts} onDismiss={dismissToast} />
     </div>
+  );
+}
+
+/**
+ * A small identity mark — stacked horizontal lines fanning into an arrow,
+ * echoing "a journal being written." Teal stroke, 24px.
+ */
+function JournalMark() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      aria-hidden
+      className="text-accent"
+    >
+      <path d="M4 6h12" />
+      <path d="M4 11h14" />
+      <path d="M4 16h9" />
+      <path d="M15 16l3 3 3-5" />
+    </svg>
   );
 }

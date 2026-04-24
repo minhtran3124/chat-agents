@@ -3,15 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --cream: #f9f6ef;
-  --paper: #fdfbf5;
-  --ink: #1a1816;
-  --subink: #5c5956;
-  --rule: #d8d3c4;
-  --terracotta: #b5491c;
-  --olive: #5a6b3e;
-  --amber: #b07d1c;
-  --danger: #a63b3b;
+  --canvas: #ffffff;
+  --surface: #f7f8fa;
+  --surface-2: #eef0f3;
+  --hairline: #e5e7eb;
+  --hairline-soft: #eff1f4;
+  --ink: #1f2328;
+  --ink-muted: #656d76;
+  --ink-dim: #8c959f;
+  --accent: #0891b2;
+  --accent-soft: #06b6d4;
+  --accent-deep: #0e7490;
+  --success: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+  color-scheme: light;
 }
 
 html,
@@ -20,7 +26,7 @@ body {
 }
 
 body {
-  background: var(--cream);
+  background: var(--canvas);
   color: var(--ink);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   font-feature-settings: "ss01", "ss02", "cv11";
@@ -29,20 +35,45 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  background: rgba(8, 145, 178, 0.18);
+  color: var(--ink);
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Slim, neutral scrollbars — visible enough to grab, quiet enough to ignore. */
+  .scrollbar-quiet::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .scrollbar-quiet::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-quiet::-webkit-scrollbar-thumb {
+    background: rgba(31, 35, 40, 0.08);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .scrollbar-quiet::-webkit-scrollbar-thumb:hover {
+    background: rgba(8, 145, 178, 0.3);
+    background-clip: padding-box;
+  }
 }
 
 /* ---------------------------------------------------------------- */
-/* Editorial brief — the research report rendered as a magazine article. */
+/* Editorial brief — the research report rendered as a blog article. */
+/* Typographic soul kept (serif h1, drop-cap); accents switched teal. */
 /* ---------------------------------------------------------------- */
 .brief {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   color: var(--ink);
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 1.0625rem;
+  line-height: 1.75;
 }
 
 .brief > *:first-child {
@@ -61,7 +92,7 @@ body {
 }
 
 .brief h1 {
-  font-size: 2.35rem;
+  font-size: 2.4rem;
   line-height: 1.1;
   margin-top: 0;
   margin-bottom: 0.7em;
@@ -69,19 +100,19 @@ body {
 
 .brief h2 {
   font-size: 1.55rem;
-  line-height: 1.2;
-  margin-top: 2em;
+  line-height: 1.25;
+  margin-top: 2.2em;
   margin-bottom: 0.55em;
 }
 
 .brief h3 {
   font-size: 1.2rem;
-  margin-top: 1.6em;
+  margin-top: 1.8em;
   margin-bottom: 0.4em;
 }
 
 .brief p {
-  margin: 0 0 1em;
+  margin: 0 0 1.05em;
 }
 
 .brief > p:first-of-type::first-letter {
@@ -91,19 +122,23 @@ body {
   font-size: 3.6em;
   float: left;
   line-height: 0.82;
-  padding: 0.06em 0.1em 0 0;
-  color: var(--ink);
+  padding: 0.06em 0.12em 0 0;
+  color: var(--accent);
 }
 
 .brief a {
-  color: var(--terracotta);
+  color: var(--accent);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  transition:
+    text-decoration-thickness 120ms ease,
+    color 120ms ease;
 }
 
 .brief a:hover {
   text-decoration-thickness: 2px;
+  color: var(--accent-deep);
 }
 
 .brief strong {
@@ -116,33 +151,35 @@ body {
 }
 
 .brief blockquote {
-  border-left: 2px solid var(--terracotta);
-  padding: 0.1em 0 0.1em 1.1em;
-  margin: 1.3em 0;
+  border-left: 3px solid var(--accent);
+  padding: 0.1em 0 0.1em 1.15em;
+  margin: 1.4em 0;
   font-family: var(--font-fraunces), Georgia, serif;
   font-style: italic;
-  font-size: 1.05em;
-  color: var(--subink);
+  font-size: 1.08em;
+  color: var(--ink-muted);
 }
 
 .brief code {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  padding: 0.08em 0.38em;
-  border-radius: 3px;
-  font-size: 0.88em;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  padding: 0.08em 0.4em;
+  border-radius: 4px;
+  font-size: 0.87em;
+  color: var(--accent-deep);
 }
 
 .brief pre {
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 6px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
   padding: 1em 1.2em;
   overflow-x: auto;
-  margin: 1.3em 0;
-  font-size: 0.92em;
+  margin: 1.4em 0;
+  font-size: 0.9em;
   line-height: 1.55;
+  color: var(--ink);
 }
 
 .brief pre code {
@@ -150,11 +187,12 @@ body {
   border: 0;
   padding: 0;
   font-size: inherit;
+  color: inherit;
 }
 
 .brief ul,
 .brief ol {
-  margin: 0 0 1em 0;
+  margin: 0 0 1.05em 0;
   padding-left: 1.4em;
 }
 
@@ -167,8 +205,12 @@ body {
 }
 
 .brief li {
-  margin-bottom: 0.35em;
-  line-height: 1.65;
+  margin-bottom: 0.4em;
+  line-height: 1.7;
+}
+
+.brief li::marker {
+  color: var(--accent);
 }
 
 .brief li > p {
@@ -178,29 +220,32 @@ body {
 .brief table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.4em 0;
+  margin: 1.5em 0;
   font-size: 0.93em;
 }
 
 .brief th,
 .brief td {
-  border-bottom: 1px solid var(--rule);
-  padding: 0.55em 0.8em;
+  border-bottom: 1px solid var(--hairline);
+  padding: 0.6em 0.85em;
   text-align: left;
   vertical-align: top;
 }
 
 .brief th {
-  font-family: var(--font-fraunces), Georgia, serif;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-weight: 600;
-  background: rgba(181, 73, 28, 0.05);
-  letter-spacing: 0.01em;
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--surface);
+  color: var(--ink-muted);
 }
 
 .brief hr {
   border: 0;
-  border-top: 1px solid var(--rule);
-  margin: 2em 0;
+  border-top: 1px solid var(--hairline);
+  margin: 2.2em 0;
 }
 
 /* Suppress drop-cap while the report is still streaming */
@@ -213,7 +258,7 @@ body {
   display: inline-block;
   width: 2px;
   height: 1.1em;
-  background: var(--terracotta);
+  background: var(--accent);
   margin-left: 2px;
   vertical-align: text-bottom;
   border-radius: 1px;
@@ -231,7 +276,7 @@ body {
 }
 
 /* ---------------------------------------------------------------- */
-/* Motion */
+/* Motion                                                           */
 /* ---------------------------------------------------------------- */
 @keyframes softPulse {
   0%,
@@ -262,15 +307,6 @@ body {
   animation: fadeInUp 0.35s ease-out both;
 }
 
-@keyframes shimmer {
-  from {
-    background-position: -200px 0;
-  }
-  to {
-    background-position: 200px 0;
-  }
-}
-
 @keyframes spinSlow {
   from {
     transform: rotate(0deg);
@@ -284,7 +320,6 @@ body {
   animation: spinSlow 0.9s linear infinite;
 }
 
-/* Three-dot typing indicator — each dot pulses with staggered delay */
 @keyframes loadingDot {
   0%,
   60%,
@@ -302,7 +337,6 @@ body {
   animation: loadingDot 1.1s ease-in-out infinite;
 }
 
-/* Skeleton shimmer — paper-colored sweep over a rule-colored bar */
 @keyframes skeletonShimmer {
   0% {
     background-position: -200px 0;
@@ -316,7 +350,7 @@ body {
   background-image: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(253, 251, 245, 0.9) 50%,
+    rgba(255, 255, 255, 0.9) 50%,
     transparent 100%
   );
   background-size: 200px 100%;
@@ -324,7 +358,6 @@ body {
   animation: skeletonShimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* Asked-card entrance — fires the instant Enter is pressed */
 @keyframes askedSlide {
   from {
     opacity: 0;
@@ -341,7 +374,7 @@ body {
 }
 
 /* ---------------------------------------------------------------- */
-/* Toast notifications — subagent completion pings, 5s lifetime.    */
+/* Toast notifications                                              */
 /* ---------------------------------------------------------------- */
 @keyframes toastIn {
   from {
@@ -373,7 +406,6 @@ body {
   animation: toastOut 0.4s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-/* Progress bar that drains over 5 seconds — matches the toast TTL. */
 @keyframes toastDrain {
   from {
     transform: scaleX(1);
@@ -403,7 +435,7 @@ body {
 .loading-bar {
   position: relative;
   height: 2px;
-  background: var(--rule);
+  background: var(--hairline);
   overflow: hidden;
 }
 
@@ -411,7 +443,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  width: 25%;
-  background: linear-gradient(90deg, transparent 0%, var(--terracotta) 50%, transparent 100%);
+  width: 28%;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
   animation: loadingSlide 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }

@@ -1,29 +1,27 @@
 import { TodoItem } from "@/lib/types";
+import { SectionHeader, EmptyHint } from "./_panel";
 
 const STATUS_STYLE: Record<TodoItem["status"], { dot: string; text: string }> = {
-  pending: { dot: "bg-rule", text: "text-subink" },
-  in_progress: { dot: "bg-terracotta animate-soft-pulse", text: "text-ink font-medium" },
-  completed: { dot: "bg-olive", text: "text-subink line-through" },
+  pending: { dot: "bg-ink-dim/50", text: "text-ink-muted" },
+  in_progress: {
+    dot: "bg-accent animate-soft-pulse",
+    text: "text-ink font-medium",
+  },
+  completed: {
+    dot: "bg-success/70",
+    text: "text-ink-dim line-through decoration-ink-dim/40",
+  },
 };
 
 export function TodoList({ items }: { items: TodoItem[] }) {
   const done = items.filter((t) => t.status === "completed").length;
   return (
-    <section className="border-b border-rule p-6">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="font-display text-base font-semibold tracking-tight">Plan</h2>
-        {items.length > 0 && (
-          <span className="text-xs tabular-nums text-subink">
-            {done} / {items.length}
-          </span>
-        )}
-      </div>
+    <section className="border-b border-hairline-soft p-6">
+      <SectionHeader title="Plan" count={items.length > 0 ? `${done} / ${items.length}` : null} />
       {items.length === 0 ? (
-        <p className="text-sm italic leading-snug text-subink/80">
-          A plan will appear here as soon as research begins.
-        </p>
+        <EmptyHint>A plan will appear here as soon as research begins.</EmptyHint>
       ) : (
-        <ol className="max-h-80 space-y-2.5 overflow-y-auto pr-1 text-sm">
+        <ol className="scrollbar-quiet max-h-80 space-y-2.5 overflow-y-auto pr-1 text-sm">
           {items.map((t, i) => {
             const s = STATUS_STYLE[t.status] ?? STATUS_STYLE.pending;
             return (

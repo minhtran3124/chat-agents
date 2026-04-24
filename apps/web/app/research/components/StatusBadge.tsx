@@ -11,40 +11,40 @@ const LABEL: Record<Status, string> = {
 export function StatusBadge({ status }: { status: Status }) {
   const dot =
     status === "loading"
-      ? "bg-amber animate-soft-pulse"
+      ? "bg-warn animate-soft-pulse"
       : status === "streaming"
-        ? "bg-terracotta animate-soft-pulse"
+        ? "bg-accent animate-soft-pulse"
         : status === "done"
-          ? "bg-olive"
+          ? "bg-success"
           : status === "error"
             ? "bg-danger"
-            : "bg-subink/50";
+            : "bg-ink-dim";
 
   const text =
     status === "loading"
-      ? "text-amber"
+      ? "text-warn"
       : status === "streaming"
-        ? "text-terracotta"
+        ? "text-accent-deep"
         : status === "done"
-          ? "text-olive"
+          ? "text-success"
           : status === "error"
             ? "text-danger"
-            : "text-subink";
+            : "text-ink-muted";
 
-  const ring =
+  const border =
     status === "loading"
-      ? "ring-amber/30"
+      ? "border-warn/30"
       : status === "streaming"
-        ? "ring-terracotta/30"
+        ? "border-accent/30"
         : status === "done"
-          ? "ring-olive/30"
+          ? "border-success/30"
           : status === "error"
-            ? "ring-danger/30"
-            : "ring-rule";
+            ? "border-danger/30"
+            : "border-hairline";
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full bg-paper px-3.5 py-1.5 text-xs font-medium uppercase tracking-caps ring-1 ${ring} ${text}`}
+      className={`inline-flex items-center gap-2 rounded-full border bg-canvas px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-caps ${border} ${text}`}
     >
       {status === "loading" ? (
         <LoadingSpinner />
@@ -59,7 +59,7 @@ export function StatusBadge({ status }: { status: Status }) {
 function LoadingSpinner() {
   return (
     <svg
-      className="animate-spin-slow h-3 w-3 text-amber"
+      className="animate-spin-slow h-3 w-3 text-warn"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden

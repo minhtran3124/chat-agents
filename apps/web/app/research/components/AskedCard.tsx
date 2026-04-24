@@ -9,12 +9,12 @@ type Status = "idle" | "loading" | "streaming" | "done" | "error";
 export function AskedCard({ question, status }: { question: string; status: Status }) {
   const dotClass =
     status === "loading"
-      ? "bg-amber animate-soft-pulse"
+      ? "bg-warn animate-soft-pulse"
       : status === "streaming"
-        ? "bg-terracotta animate-soft-pulse"
+        ? "bg-accent animate-soft-pulse"
         : status === "error"
           ? "bg-danger"
-          : "bg-olive";
+          : "bg-success";
 
   const statusLabel =
     status === "loading"
@@ -26,21 +26,21 @@ export function AskedCard({ question, status }: { question: string; status: Stat
           : "Answered";
 
   return (
-    <div className="animate-asked-slide border-b border-rule bg-cream px-8 py-4">
+    <div className="animate-asked-slide border-b border-hairline bg-surface/60 px-8 py-4">
       <div className="flex items-start gap-4">
-        <div className="mt-1 flex-none">
+        <div className="mt-2 flex-none">
           <span className={`inline-block h-2 w-2 rounded-full ${dotClass}`} aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-baseline gap-2">
-            <span className="text-[10px] font-medium uppercase tracking-caps text-subink">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-caps text-ink-dim">
               You asked
             </span>
-            <span className="text-[10px] uppercase tracking-caps text-subink/60">
+            <span className="font-mono text-[10px] uppercase tracking-caps text-ink-dim/70">
               · {statusLabel}
             </span>
           </div>
-          <p className="font-display text-base italic leading-snug text-ink">
+          <p className="font-display text-[17px] italic leading-snug text-ink">
             &ldquo;{question}&rdquo;
           </p>
         </div>

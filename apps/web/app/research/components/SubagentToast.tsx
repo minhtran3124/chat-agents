@@ -31,25 +31,25 @@ function Toast({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) =
     <div
       className={`${
         exiting ? "toast-exit" : "toast-enter"
-      } pointer-events-auto w-80 overflow-hidden rounded-sm border border-olive/30 bg-paper shadow-[0_10px_30px_-12px_rgba(26,24,22,0.25)]`}
+      } pointer-events-auto w-80 overflow-hidden rounded-lg border border-hairline bg-canvas shadow-toast`}
       role="status"
       aria-live="polite"
     >
       <div className="flex items-start gap-3 px-4 py-3">
-        <span className="mt-[5px] inline-block h-2 w-2 flex-none rounded-full bg-olive" />
+        <span className="mt-[5px] inline-block h-2 w-2 flex-none rounded-full bg-success" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="font-display text-sm font-semibold capitalize tracking-tight text-ink">
-              {item.name}
+            <span className="text-sm font-semibold capitalize text-ink">{item.name}</span>
+            <span className="font-mono text-[9px] font-medium uppercase tracking-caps text-success">
+              done
             </span>
-            <span className="text-[9px] font-medium uppercase tracking-caps text-olive">done</span>
           </div>
-          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-subink">
+          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-ink-muted">
             {item.task || "Finished research task."}
           </p>
         </div>
       </div>
-      <div className="toast-drain h-0.5 bg-olive/70" />
+      <div className="toast-drain h-[2px] bg-success/70" />
     </div>
   );
 }

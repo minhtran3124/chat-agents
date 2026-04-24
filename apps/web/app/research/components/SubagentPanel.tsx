@@ -1,4 +1,5 @@
 import { SubagentRun, CompressionEvent } from "@/lib/types";
+import { EmptyHint, PanelCard, Pill } from "./_panel";
 
 export function SubagentPanel({
   runs,
@@ -9,46 +10,37 @@ export function SubagentPanel({
 }) {
   const list = Object.values(runs);
   return (
-    <section className="border-b border-rule p-6">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="font-display text-base font-semibold tracking-tight">Researchers</h2>
-        {compressions.length > 0 && (
-          <span className="rounded-full bg-amber/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-caps text-amber">
-            Memory refreshed ×{compressions.length}
-          </span>
-        )}
+    <section className="border-b border-hairline-soft p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-caps text-ink-muted">
+          Researchers
+        </h2>
+        {compressions.length > 0 && <Pill tone="warn">Memory · {compressions.length}</Pill>}
       </div>
       {list.length === 0 ? (
-        <p className="text-sm italic leading-snug text-subink/80">
-          When a specialist is called in, you&rsquo;ll see their task here.
-        </p>
+        <EmptyHint>When a specialist is called in, you&rsquo;ll see their task here.</EmptyHint>
       ) : (
-        <ul className="max-h-80 space-y-2.5 overflow-y-auto pr-1">
+        <ul className="scrollbar-quiet max-h-80 space-y-2 overflow-y-auto pr-1">
           {list.map((r) => (
-            <li
-              key={r.id}
-              className="animate-fade-in-up rounded-sm border border-rule bg-paper/80 px-3.5 py-3 text-sm"
-            >
+            <PanelCard key={r.id}>
               <div className="flex items-center gap-2">
                 <span
                   className={`h-2 w-2 flex-none rounded-full ${
-                    r.status === "running" ? "animate-soft-pulse bg-terracotta" : "bg-olive"
+                    r.status === "running" ? "animate-soft-pulse bg-accent" : "bg-success/70"
                   }`}
                 />
-                <span className="font-display text-sm font-semibold capitalize tracking-tight text-ink">
-                  {r.name}
-                </span>
-                <span className="ml-auto text-[10px] uppercase tracking-caps text-subink">
+                <span className="text-sm font-semibold capitalize text-ink">{r.name}</span>
+                <span className="ml-auto font-mono text-[9px] uppercase tracking-caps text-ink-dim">
                   {r.status === "running" ? "working" : "done"}
                 </span>
               </div>
-              <p className="mt-2 line-clamp-3 leading-snug text-subink">{r.task}</p>
+              <p className="mt-2 line-clamp-3 leading-snug text-ink-muted">{r.task}</p>
               {r.summary && (
-                <p className="mt-2.5 line-clamp-3 border-t border-rule pt-2.5 text-xs leading-snug text-ink/75">
+                <p className="mt-2.5 line-clamp-3 border-t border-hairline-soft pt-2.5 text-xs leading-snug text-ink/80">
                   {r.summary}
                 </p>
               )}
-            </li>
+            </PanelCard>
           ))}
         </ul>
       )}

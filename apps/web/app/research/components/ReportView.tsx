@@ -18,16 +18,10 @@ type Source = "stream" | "file" | "error" | null;
  */
 function sanitizeReport(text: string): string {
   let out = text
-    // 1. Normalise standalone *** / **** lines → --- (thematic break)
-    //    Must run before the heading fix so we don't touch emphasis inside text.
     .replace(/^[ \t]*\*{3,}[ \t]*$/gm, "---")
-    // 2. Remove stray trailing ** or *** at end of heading lines
     .replace(/(^#{1,6} .+?)\s*\*{2,3}[ \t]*$/gm, "$1")
     .trim();
 
-  // 3. Strip short agent preamble that appears before the first heading.
-  //    Only remove it when it looks like commentary (no list/quote markers,
-  //    shorter than 300 chars) so we don't accidentally drop a text-only report.
   const firstHeading = out.search(/^#{1,6} /m);
   if (firstHeading > 0) {
     const preamble = out.slice(0, firstHeading);
@@ -60,20 +54,26 @@ export function ReportView({
   const clean = sanitizeReport(text);
 
   return (
-    <div className="mx-auto max-w-3xl px-10 py-14">
-      <div className="mb-8 flex items-baseline gap-3 border-b border-rule pb-4">
-        <span className="text-[10px] uppercase tracking-caps text-subink">The brief</span>
+    <div className="mx-auto max-w-[720px] px-10 py-14">
+      <div className="mb-8 flex items-center gap-3 border-b border-hairline pb-4">
+        <span className="font-mono text-[10px] font-medium uppercase tracking-caps text-ink-dim">
+          The brief
+        </span>
+        <span className="h-px flex-1 bg-hairline-soft" aria-hidden />
         {streaming && (
-          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-caps text-terracotta">
-            <span className="animate-soft-pulse">●</span> writing
+          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-caps text-accent-deep">
+            <span className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-accent" />
+            writing
           </span>
         )}
         {status === "done" && !reconstructed && (
-          <span className="text-[10px] uppercase tracking-caps text-olive">ready</span>
+          <span className="font-mono text-[10px] font-medium uppercase tracking-caps text-success">
+            ready
+          </span>
         )}
         {reconstructed && (
           <span
-            className="text-[10px] uppercase tracking-caps text-amber"
+            className="font-mono text-[10px] font-medium uppercase tracking-caps text-warn"
             title="The agent saved the report to a file instead of replying inline; the UI rebuilt it from draft.md."
           >
             rebuilt from notes
@@ -100,46 +100,46 @@ function Preparing() {
   return (
     <div className="mx-auto flex h-full max-w-2xl items-center px-10 py-12">
       <div className="w-full">
-        <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-amber/10 px-3 py-1 text-[10px] font-medium uppercase tracking-caps text-amber">
+        <div className="bg-warn/8 mb-6 inline-flex items-center gap-2 rounded-full border border-warn/25 px-3 py-1 font-mono text-[10px] font-medium uppercase tracking-caps text-warn">
           <span className="flex gap-1" aria-hidden>
-            <span className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-amber" />
+            <span className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-warn" />
             <span
-              className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-amber"
+              className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-warn"
               style={{ animationDelay: "0.18s" }}
             />
             <span
-              className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-amber"
+              className="animate-loading-dot h-1.5 w-1.5 rounded-full bg-warn"
               style={{ animationDelay: "0.36s" }}
             />
           </span>
           Preparing
         </div>
 
-        <h2 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink">
-          Warming up <span className="italic text-terracotta">the notebook.</span>
+        <h2 className="font-display text-[52px] font-semibold leading-[1.05] tracking-tight text-ink">
+          Warming up <span className="italic text-accent">the journal.</span>
         </h2>
 
-        <p className="mt-5 max-w-lg text-base leading-relaxed text-subink">
+        <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-ink-muted">
           Sketching a plan, summoning specialist researchers, and opening the virtual filesystem.
           The brief will begin streaming here in a moment.
         </p>
 
-        <div className="mt-10 border-t border-rule pt-6">
-          <div className="mb-3 text-[10px] uppercase tracking-caps text-subink">
+        <div className="mt-10 border-t border-hairline-soft pt-6">
+          <div className="mb-4 font-mono text-[10px] font-medium uppercase tracking-caps text-ink-dim">
             Behind the scenes
           </div>
           <ul className="space-y-3 text-sm">
             {LOADING_STEPS.map((step, i) => (
               <li
                 key={step}
-                className="animate-fade-in-up flex items-center gap-3 text-subink"
+                className="animate-fade-in-up flex items-center gap-3 text-ink-muted"
                 style={{ animationDelay: `${i * 220}ms` }}
               >
                 <span
-                  className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-amber"
+                  className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-warn"
                   style={{ animationDelay: `${i * 220}ms` }}
                 />
-                <span className="font-medium text-ink/80">{step}</span>
+                <span className="font-medium text-ink/85">{step}</span>
               </li>
             ))}
           </ul>
@@ -160,16 +160,16 @@ function Researching() {
   return (
     <div className="mx-auto flex h-full max-w-2xl items-center px-10 py-12">
       <div className="w-full">
-        <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-terracotta/10 px-3 py-1 text-[10px] font-medium uppercase tracking-caps text-terracotta">
-          <span className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-terracotta" aria-hidden />
+        <div className="bg-accent/8 mb-6 inline-flex items-center gap-2 rounded-full border border-accent/25 px-3 py-1 font-mono text-[10px] font-medium uppercase tracking-caps text-accent-deep">
+          <span className="animate-soft-pulse h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
           Researching
         </div>
 
-        <h2 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink">
-          Researchers are <span className="italic text-terracotta">at work.</span>
+        <h2 className="font-display text-[52px] font-semibold leading-[1.05] tracking-tight text-ink">
+          Researchers are <span className="italic text-accent">at work.</span>
         </h2>
 
-        <p className="mt-5 max-w-lg text-base leading-relaxed text-subink">
+        <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-ink-muted">
           Specialist researchers are digging in, saving notes as they find them. The brief will
           begin streaming here once they surface enough to write.
         </p>
@@ -187,35 +187,42 @@ function Researching() {
 }
 
 function SkeletonLine({ width }: { width: string }) {
-  return <div className="animate-skeleton-shimmer h-2.5 rounded-sm bg-rule/60" style={{ width }} />;
+  return (
+    <div className="animate-skeleton-shimmer h-2.5 rounded-sm bg-surface-2" style={{ width }} />
+  );
 }
 
 function Welcome() {
   return (
     <div className="mx-auto flex h-full max-w-2xl items-center px-10 py-12">
       <div>
-        <p className="mb-3 text-[10px] uppercase tracking-caps text-subink">Deep research, live</p>
-        <h2 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink">
-          What would you like <span className="italic text-terracotta">researched?</span>
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas px-3 py-1 font-mono text-[10px] font-medium uppercase tracking-caps text-ink-muted">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+          Deep research, live
+        </div>
+        <h2 className="font-display text-[60px] font-semibold leading-[1.02] tracking-tight text-ink">
+          What would you like <span className="italic text-accent">researched?</span>
         </h2>
-        <p className="mt-5 max-w-lg text-base leading-relaxed text-subink">
-          Type a question above. You&rsquo;ll watch the notebook sketch a plan, send specialist
+        <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-ink-muted">
+          Type a question above. You&rsquo;ll watch the journal sketch a plan, send specialist
           researchers to dig in, save notes as they find them, and write the brief here in real time
           &mdash; citations included.
         </p>
-        <div className="mt-10 border-t border-rule pt-5">
-          <div className="mb-3 text-[10px] uppercase tracking-caps text-subink">Try asking</div>
-          <ul className="space-y-2 font-display italic text-ink/85">
-            <li className="flex gap-2">
-              <span className="select-none text-terracotta">&mdash;</span>
+        <div className="mt-10 border-t border-hairline-soft pt-6">
+          <div className="mb-4 font-mono text-[10px] font-medium uppercase tracking-caps text-ink-dim">
+            Try asking
+          </div>
+          <ul className="space-y-2.5 font-display text-[17px] italic text-ink/90">
+            <li className="flex gap-3">
+              <span className="select-none text-accent">—</span>
               Compare LangGraph, AutoGen, and CrewAI for production multi-agent systems.
             </li>
-            <li className="flex gap-2">
-              <span className="select-none text-terracotta">&mdash;</span>
+            <li className="flex gap-3">
+              <span className="select-none text-accent">—</span>
               What&rsquo;s the state of retrieval-augmented generation for enterprise search?
             </li>
-            <li className="flex gap-2">
-              <span className="select-none text-terracotta">&mdash;</span>
+            <li className="flex gap-3">
+              <span className="select-none text-accent">—</span>
               How are major labs handling model evaluation and red-teaming in 2025?
             </li>
           </ul>
