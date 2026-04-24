@@ -1,5 +1,6 @@
 # apps/api/tests/unit/test_research_router.py
 """Unit tests for /research router — prompt version resolution and stream_end payload."""
+
 import json
 from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -23,6 +24,7 @@ def _make_mock_agent(
     ``.values`` is that dict (used to simulate a populated virtual FS for the
     final-report fallback path).
     """
+
     async def _astream(*args, **kwargs) -> AsyncGenerator:
         for item in stream_events:
             yield item
@@ -69,9 +71,7 @@ async def test_stream_end_contains_versions_used():
         mock_registry.resolve_versions.return_value = mock_versions
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/research",
                 json={"question": "What is LangGraph?"},
@@ -99,9 +99,7 @@ async def test_per_request_override_takes_precedence():
         mock_registry.resolve_versions.return_value = override_resolved
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/research",
                 json={"question": "test", "prompt_versions": {"main": "v2"}},
@@ -146,9 +144,7 @@ async def test_stream_end_falls_back_to_draft_when_stream_is_thin():
         mock_registry.resolve_versions.return_value = mock_versions
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/research", json={"question": "Question?"})
 
     assert response.status_code == 200
@@ -182,13 +178,13 @@ async def test_stream_end_prefers_stream_when_report_is_long_enough():
         patch("app.routers.research.build_research_agent", return_value=mock_agent),
     ):
         mock_registry.resolve_versions.return_value = {
-            "main": "v2", "researcher": "v1", "critic": "v1",
+            "main": "v2",
+            "researcher": "v1",
+            "critic": "v1",
         }
         mock_registry.get.return_value = "mock prompt text"
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/research", json={"question": "Question?"})
 
     events = _parse_sse(response.text)
@@ -282,8 +278,9 @@ async def test_generator_success_path_no_error_event(
     monkeypatch,
 ):
     """Regression guard: success stream_end must have source='stream' and NO error event."""
-    from app.routers.research import research as research_handler
     from langchain_core.messages import AIMessageChunk
+
+    from app.routers.research import research as research_handler
 
     long_text = "Streamed report content. " * 20  # > MIN_STREAM_REPORT_CHARS (200)
     streamed_chunk = AIMessageChunk(content=long_text)
