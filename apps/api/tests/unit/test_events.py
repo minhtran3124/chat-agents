@@ -163,3 +163,16 @@ def test_stream_end_accepts_error_as_final_report_source():
     data = json.loads(ev["data"])
     assert data["final_report_source"] == "error"
     assert data["final_report"] == ""
+
+
+@pytest.mark.unit
+def test_budget_exceeded_factory_shape():
+    from app.streaming.events import budget_exceeded
+
+    ev = budget_exceeded(tokens_used=207_432, limit=200_000)
+    assert ev["event"] == "budget_exceeded"
+    data = json.loads(ev["data"])
+    assert data["tokens_used"] == 207_432
+    assert data["limit"] == 200_000
+    assert "207,432" in data["message"]
+    assert "200,000" in data["message"]

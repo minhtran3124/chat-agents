@@ -103,3 +103,17 @@ def stream_end(
             "final_report_source": final_report_source,
         },
     )
+
+
+def budget_exceeded(tokens_used: int, limit: int) -> dict:
+    return _sse(
+        "budget_exceeded",
+        {
+            "tokens_used": tokens_used,
+            "limit": limit,
+            "message": (
+                f"Run stopped: token budget exceeded "
+                f"({tokens_used:,} / {limit:,} tokens)."
+            ),
+        },
+    )
