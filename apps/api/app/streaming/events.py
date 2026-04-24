@@ -92,7 +92,7 @@ def stream_end(
     final_report: str,
     usage: dict[str, Any],
     versions_used: dict[str, str],
-    final_report_source: Literal["stream", "file"] = "stream",
+    final_report_source: FinalReportSource = "stream",
 ) -> dict:
     return _sse(
         "stream_end",

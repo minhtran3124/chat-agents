@@ -145,3 +145,22 @@ def test_error_factory_internal_shape():
     assert data["reason"] == "internal"
     assert data["recoverable"] is False
     assert data["message"] == ERROR_MESSAGES["internal"]
+
+
+# ---------------------------------------------------------------------------
+# Task 1.4 — widen stream_end() final_report_source
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_stream_end_accepts_error_as_final_report_source():
+    ev = events.stream_end(
+        final_report="",
+        usage={},
+        versions_used={"main": "v3"},
+        final_report_source="error",
+    )
+    assert ev["event"] == "stream_end"
+    data = json.loads(ev["data"])
+    assert data["final_report_source"] == "error"
+    assert data["final_report"] == ""
