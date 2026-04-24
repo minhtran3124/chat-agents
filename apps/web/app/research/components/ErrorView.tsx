@@ -11,8 +11,15 @@ type ErrorViewProps = {
   onRetry?: () => void;
 };
 
+const HEADER_BY_REASON: Record<ErrorReason, string> = {
+  timeout: "Research timed out",
+  rate_limited: "Rate limited",
+  internal: "Research stopped",
+};
+
 export function ErrorView({
   error,
+  reason,
   recoverable,
   budgetExceeded,
   onReset,
@@ -23,6 +30,7 @@ export function ErrorView({
   }
   return (
     <ErrorPanel
+      header={reason ? HEADER_BY_REASON[reason] : "Research stopped"}
       message={error ?? "Research stopped unexpectedly."}
       recoverable={recoverable === true}
       onReset={onReset}
@@ -34,7 +42,10 @@ export function ErrorView({
 function BudgetWarning({ data, onReset }: { data: BudgetExceeded; onReset: () => void }) {
   const pct = Math.min(100, (data.tokens_used / data.limit) * 100);
   return (
-    <div className="mx-auto mt-10 max-w-xl rounded-lg border border-warn/40 bg-warn/10 p-6 text-warn">
+    <div
+      role="alert"
+      className="mx-auto mt-10 max-w-xl rounded-lg border border-warn/40 bg-warn/10 p-6 text-warn"
+    >
       <div className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-caps">
         <WarningGlyph />
         Token budget exceeded
@@ -59,21 +70,26 @@ function BudgetWarning({ data, onReset }: { data: BudgetExceeded; onReset: () =>
 }
 
 function ErrorPanel({
+  header,
   message,
   recoverable,
   onReset,
   onRetry,
 }: {
+  header: string;
   message: string;
   recoverable: boolean;
   onReset: () => void;
   onRetry?: () => void;
 }) {
   return (
-    <div className="mx-auto mt-10 max-w-xl rounded-lg border border-danger/40 bg-danger/5 p-6 text-danger">
+    <div
+      role="alert"
+      className="mx-auto mt-10 max-w-xl rounded-lg border border-danger/40 bg-danger/5 p-6 text-danger"
+    >
       <div className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-caps">
         <ErrorGlyph />
-        Research stopped
+        {header}
       </div>
       <p className="mb-4 text-sm text-ink">{message}</p>
       <div className="flex justify-end gap-2">

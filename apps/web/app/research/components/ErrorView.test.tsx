@@ -42,7 +42,10 @@ describe("ErrorView", () => {
         onRetry={vi.fn()}
       />,
     );
-    expect(screen.getByText(/research timed out/i)).toBeTruthy();
+    // Both the header (derived from reason="timeout") and body message render;
+    // assert we see two separate timed-out strings.
+    expect(screen.getAllByText(/research timed out/i)).toHaveLength(2);
+    expect(screen.getByRole("alert")).toBeTruthy();
     expect(screen.getByRole("button", { name: /try again/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /new research/i })).toBeTruthy();
   });
