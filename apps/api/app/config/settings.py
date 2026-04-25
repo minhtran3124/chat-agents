@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEFAULT_MODEL = {
     "anthropic": "claude-sonnet-4-6",
-    "openai": "gpt-4o",
+    "openai": "gpt-4.1-mini",
     "google": "gemini-1.5-pro",
 }
 
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: str = Field(..., description="Required for research tool")
 
     CHECKPOINT_DB_PATH: str = "./data/checkpoints.sqlite"
-    VFS_OFFLOAD_THRESHOLD_TOKENS: int = 20_000
+    VFS_OFFLOAD_THRESHOLD_TOKENS: int = 10000
     COMPRESSION_DETECTION_RATIO: float = 0.7
     RESEARCH_TIMEOUT_S: int = Field(
         default=500,

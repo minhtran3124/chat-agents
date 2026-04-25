@@ -6,7 +6,7 @@ from app.config.settings import settings
 
 _FAST_MODEL = {
     "anthropic": "claude-haiku-4-5",
-    "openai": "gpt-4o-mini",
+    "openai": "gpt-4.1-mini",
     "google": "gemini-1.5-flash",
 }
 
