@@ -1,7 +1,7 @@
 ---
 name: coding
 description: "Write, review, or refactor Python/FastAPI code — endpoints, services, repositories, schemas, AI streaming, Claude integration, or any backend logic."
-model: sonet
+model: sonnet
 color: orange
 memory: project
 ---
