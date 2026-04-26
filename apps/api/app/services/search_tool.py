@@ -1,110 +1,53 @@
-import re
-import uuid
-from typing import Any
-from urllib.parse import urlparse
+from typing import Annotated, Any
 
-import tiktoken
-from deepagents.backends.state import StateBackend
 from langchain_core.tools import tool
+from langgraph.prebuilt import InjectedState
 from tavily import TavilyClient
 
 from app.config.settings import settings
 
 _tavily = TavilyClient(api_key=settings.TAVILY_API_KEY)
-_enc = tiktoken.encoding_for_model("gpt-4o")
-_state_backend = StateBackend()
 
-_SNIPPET_CHAR_LIMIT = 600
-_SLUG_RE = re.compile(r"[^a-z0-9]+")
+_MAX_SEARCHES_PER_AGENT = 4
 
 
-def _count_tokens(text: str) -> int:
-    return len(_enc.encode(text))
+def _count_searches_in_messages(messages: list[Any]) -> int:
+    """Count AIMessage tool_calls of name='internet_search' in the agent's state.
 
-
-def _slug(text: str, limit: int = 40) -> str:
-    s = _SLUG_RE.sub("-", text.lower()).strip("-")
-    return (s[:limit] or "untitled").rstrip("-")
-
-
-def _result_path(query_slug: str, idx: int, url: str) -> str:
-    host = urlparse(url).hostname or "unknown"
-    return f"/research/searches/{query_slug}/{idx:02d}-{_slug(host, limit=30)}.md"
-
-
-def _format_full_content(result: dict[str, Any]) -> str:
-    return (
-        f"# {result.get('title', 'Untitled')}\n"
-        f"Source: {result.get('url', '')}\n"
-        f"Score: {result.get('score', 'n/a')}\n\n"
-        f"{result.get('content', '')}"
-    )
-
-
-def _build_offloaded_response(
-    raw: dict[str, Any],
-    threshold: int,
-) -> tuple[dict[str, Any], list[tuple[str, str]]]:
-    """Decide whether to offload Tavily results to the virtual filesystem.
-
-    Returns (response, files_to_write). When the total content tokens are at
-    or below `threshold`, returns `raw` unchanged and an empty file list.
-    Otherwise returns a response where each result carries a `snippet` plus
-    `full_content_path`, and a list of `(path, content)` tuples for the
-    caller to persist via the state backend.
+    Includes the in-flight call (the one being executed now), because the
+    LLM's AIMessage that triggered it is already in state by the time the
+    tool runs.
     """
-    results = raw.get("results", []) or []
-    total_tokens = sum(_count_tokens(str(r.get("content", ""))) for r in results)
-
-    if total_tokens <= threshold or not results:
-        return raw, []
-
-    query_slug = _slug(str(raw.get("query", "query")))
-    files_to_write: list[tuple[str, str]] = []
-    new_results: list[dict[str, Any]] = []
-    for idx, r in enumerate(results, start=1):
-        content = str(r.get("content", ""))
-        path = _result_path(query_slug, idx, str(r.get("url", "")))
-        files_to_write.append((path, _format_full_content(r)))
-        new_results.append(
-            {
-                "title": r.get("title"),
-                "url": r.get("url"),
-                "score": r.get("score"),
-                "snippet": content[:_SNIPPET_CHAR_LIMIT],
-                "full_content_path": path,
-            }
-        )
-
-    return {
-        **raw,
-        "results": new_results,
-        "offloaded": True,
-        "total_tokens": total_tokens,
-    }, files_to_write
+    n = 0
+    for m in messages or []:
+        for tc in getattr(m, "tool_calls", None) or []:
+            if tc.get("name") == "internet_search":
+                n += 1
+    return n
 
 
 @tool
-def internet_search(query: str) -> dict:
+def internet_search(
+    query: str,
+    state: Annotated[dict, InjectedState],
+) -> dict:
     """Search the web for up-to-date information.
 
-    Returns a list of relevant results. When the combined content size
-    exceeds the configured offload threshold, full result bodies are saved
-    to the virtual filesystem and each result carries a `snippet` plus a
-    `full_content_path`. Use `read_file(<full_content_path>)` only when you
-    need the entire article — the snippet is enough for most decisions.
+    Each agent (the main agent and each researcher/critic subagent) is
+    capped at 4 `internet_search` calls per invocation. The cap is enforced
+    by counting AIMessage tool_calls in the agent's state — each subagent
+    has its own state, so the quota is naturally per-subagent. Once
+    reached, the tool refuses further calls so the agent must synthesize
+    from existing results.
     """
-    raw = _tavily.search(query=query, max_results=5, topic="general")
-    response, files_to_write = _build_offloaded_response(
-        raw, threshold=settings.VFS_OFFLOAD_THRESHOLD_TOKENS
-    )
-    for path, content in files_to_write:
-        result = _state_backend.write(path, content)
-        if result.error:
-            fallback = path.replace(".md", f"-{uuid.uuid4().hex[:6]}.md")
-            _state_backend.write(fallback, content)
-            for r in response["results"]:
-                if r.get("full_content_path") == path:
-                    r["full_content_path"] = fallback
-                    break
-    return response
+    count_including_self = _count_searches_in_messages(state.get("messages", []))
+    if count_including_self > _MAX_SEARCHES_PER_AGENT:
+        return {
+            "error": "search_budget_exhausted",
+            "message": (
+                f"You have already made {_MAX_SEARCHES_PER_AGENT} searches in this "
+                "agent run. Synthesize a summary from the search results you already "
+                "have — do not call internet_search again."
+            ),
+        }
+    return _tavily.search(query=query, max_results=5, topic="general")

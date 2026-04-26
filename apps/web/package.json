@@ -13,6 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@radix-ui/react-tooltip": "^1.2.8",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",

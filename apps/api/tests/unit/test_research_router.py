@@ -26,8 +26,14 @@ def _make_mock_agent(
     """
 
     async def _astream(*args, **kwargs) -> AsyncGenerator:
+        # Router uses subgraphs=True, which returns (namespace, mode, chunk).
+        # Test fixtures express (mode, chunk); wrap them with an empty
+        # namespace so the unpacking matches.
         for item in stream_events:
-            yield item
+            if len(item) == 2:
+                yield ((), item[0], item[1])
+            else:
+                yield item
 
     agent = MagicMock()
     agent.astream = _astream
@@ -284,7 +290,7 @@ async def test_generator_success_path_no_error_event(
 
     long_text = "Streamed report content. " * 20  # > MIN_STREAM_REPORT_CHARS (200)
     streamed_chunk = AIMessageChunk(content=long_text)
-    stream_events_list = [("messages", (streamed_chunk, {}))]
+    stream_events_list = [((), "messages", (streamed_chunk, {}))]
 
     class _OkAgent:
         async def astream(self, *_args, **_kwargs):

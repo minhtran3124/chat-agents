@@ -19,13 +19,14 @@ async def test_over_budget_request_yields_budget_exceeded_then_stream_end(monkey
     monkeypatch.setattr(settings_mod.settings, "MAX_TOKENS_PER_RUN", 1_000)
 
     async def fake_astream(*args, **kwargs):
+        # Router uses subgraphs=True → (namespace, mode, chunk) triples.
         # Each messages chunk reports 600 tokens — two chunks cross 1000.
         msg1 = SimpleNamespace(usage_metadata={"input_tokens": 400, "output_tokens": 200})
-        yield ("messages", (msg1, {}))
+        yield ((), "messages", (msg1, {}))
         msg2 = SimpleNamespace(usage_metadata={"input_tokens": 400, "output_tokens": 200})
-        yield ("messages", (msg2, {}))
+        yield ((), "messages", (msg2, {}))
         # This chunk should never be processed — generator should have returned.
-        yield ("values", {"messages": [], "files": {}})
+        yield ((), "values", {"messages": [], "files": {}})
 
     fake_agent = MagicMock()
     fake_agent.astream = fake_astream

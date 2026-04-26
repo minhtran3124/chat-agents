@@ -4,11 +4,13 @@ import { SectionHeader, EmptyHint, PanelCard } from "./_panel";
 const ROLE_LABEL: Record<Reflection["role"], string> = {
   main: "Planner",
   researcher: "Researcher",
+  critic: "Critic",
 };
 
 const ROLE_DOT: Record<Reflection["role"], string> = {
   main: "bg-ink-muted/70",
   researcher: "bg-accent",
+  critic: "bg-warn",
 };
 
 export function ReflectionPanel({ reflections }: { reflections: Reflection[] }) {

@@ -252,6 +252,121 @@ describe("useResearchStream reducer — stream_end success path", () => {
   });
 });
 
+describe("useResearchStream reducer — workflow tree", () => {
+  it("tool_call_started creates a root node with status running", () => {
+    const s = reducer(initial, {
+      event: "tool_call_started",
+      data: {
+        id: "c1",
+        role: "main",
+        tool_name: "internet_search",
+        args_preview: '{"query":"X"}',
+      },
+    });
+    expect(s.workflow.rootIds).toEqual(["c1"]);
+    const node = s.workflow.nodes["c1"];
+    expect(node.status).toBe("running");
+    expect(node.parentId).toBeNull();
+    expect(node.toolName).toBe("internet_search");
+    expect(s.workflow.lastNonTaskCallId).toBe("c1");
+  });
+
+  it("task tool_call pushes onto taskStack and child tools nest under it", () => {
+    let s = reducer(initial, {
+      event: "tool_call_started",
+      data: { id: "task1", role: "main", tool_name: "task", args_preview: "{}" },
+    });
+    expect(s.workflow.taskStack).toEqual(["task1"]);
+    s = reducer(s, {
+      event: "tool_call_started",
+      data: {
+        id: "child1",
+        role: "researcher",
+        tool_name: "internet_search",
+        args_preview: "{}",
+      },
+    });
+    expect(s.workflow.rootIds).toEqual(["task1"]);
+    expect(s.workflow.nodes["task1"].childIds).toEqual(["child1"]);
+    expect(s.workflow.nodes["child1"].parentId).toBe("task1");
+  });
+
+  it("tool_call_completed updates status, result, duration and clears lastNonTaskCallId", () => {
+    let s = reducer(initial, {
+      event: "tool_call_started",
+      data: { id: "c1", role: "main", tool_name: "read_file", args_preview: "{}" },
+    });
+    s = reducer(s, {
+      event: "tool_call_completed",
+      data: { id: "c1", status: "ok", result_preview: "data", duration_ms: 320 },
+    });
+    expect(s.workflow.nodes["c1"].status).toBe("ok");
+    expect(s.workflow.nodes["c1"].resultPreview).toBe("data");
+    expect(s.workflow.nodes["c1"].durationMs).toBe(320);
+    expect(s.workflow.lastNonTaskCallId).toBeNull();
+  });
+
+  it("tool_call_completed for a task pops it off the stack", () => {
+    let s = reducer(initial, {
+      event: "tool_call_started",
+      data: { id: "task1", role: "main", tool_name: "task", args_preview: "{}" },
+    });
+    s = reducer(s, {
+      event: "tool_call_completed",
+      data: { id: "task1", status: "ok", result_preview: "summary", duration_ms: 1000 },
+    });
+    expect(s.workflow.taskStack).toEqual([]);
+  });
+
+  it("file_saved attaches path to the most recently started non-task tool", () => {
+    let s = reducer(initial, {
+      event: "tool_call_started",
+      data: {
+        id: "search1",
+        role: "main",
+        tool_name: "internet_search",
+        args_preview: "{}",
+      },
+    });
+    s = reducer(s, {
+      event: "file_saved",
+      data: { path: "/r/searches/x.md", size_tokens: 1200, preview: "hi" },
+    });
+    expect(s.workflow.nodes["search1"].files).toEqual(["/r/searches/x.md"]);
+    expect(s.files).toHaveLength(1);
+  });
+
+  it("file_saved with no active tool still adds to files list but not to a node", () => {
+    const s = reducer(initial, {
+      event: "file_saved",
+      data: { path: "/r/orphan.md", size_tokens: 50, preview: "x" },
+    });
+    expect(s.files).toHaveLength(1);
+    expect(Object.keys(s.workflow.nodes)).toHaveLength(0);
+  });
+
+  it("duplicate tool_call_started for same id is a no-op", () => {
+    let s = reducer(initial, {
+      event: "tool_call_started",
+      data: { id: "c1", role: "main", tool_name: "X", args_preview: "" },
+    });
+    const before = s;
+    s = reducer(s, {
+      event: "tool_call_started",
+      data: { id: "c1", role: "main", tool_name: "X", args_preview: "" },
+    });
+    expect(s).toBe(before);
+  });
+
+  it("tool_call_completed for unknown id is a no-op", () => {
+    const s = reducer(initial, {
+      event: "tool_call_completed",
+      data: { id: "ghost", status: "ok", result_preview: "", duration_ms: 0 },
+    });
+    expect(s).toBe(initial);
+  });
+});
+
 describe("useResearchStream reducer — budget_exceeded event", () => {
   it("sets budgetExceeded, status:'error', error, and errorRecoverable:false", () => {
     const frame: SSEFrame = {
@@ -264,9 +379,7 @@ describe("useResearchStream reducer — budget_exceeded event", () => {
     };
     const next = reducer(initial, frame);
     expect(next.status).toBe("error");
-    expect(next.error).toBe(
-      "Run stopped: token budget exceeded (207,432 / 200,000 tokens).",
-    );
+    expect(next.error).toBe("Run stopped: token budget exceeded (207,432 / 200,000 tokens).");
     expect(next.errorRecoverable).toBe(false);
     expect(next.budgetExceeded).toEqual({
       tokens_used: 207_432,

@@ -14,10 +14,12 @@ async def test_research_endpoint_streams_expected_event_sequence(monkeypatch):
     from langchain_core.messages import AIMessage, ToolMessage
 
     async def fake_astream(*args, **kwargs):
-        # Todo tracker update
-        yield ("updates", {"main": {"todos": [{"text": "step1", "status": "pending"}]}})
+        # Router uses subgraphs=True → (namespace, mode, chunk) triples.
+        # Empty namespace == parent graph; non-empty would be a subagent.
+        yield ((), "updates", {"main": {"todos": [{"text": "step1", "status": "pending"}]}})
         # Main agent spawns researcher subagent via the `task` tool
         yield (
+            (),
             "updates",
             {
                 "model": {
@@ -41,6 +43,7 @@ async def test_research_endpoint_streams_expected_event_sequence(monkeypatch):
         )
         # Researcher returns via matching ToolMessage
         yield (
+            (),
             "updates",
             {
                 "tools": {
@@ -95,7 +98,7 @@ async def test_synthetic_compression_emitted_when_no_real_compression(monkeypatc
     async def fake_astream(*args, **kwargs):
         # Single huge values snapshot so peak_tokens > 30k, but no token drop
         # tiktoken encodes 8 consecutive 'x' as 1 token, so 250_000 chars ≈ 31_250 tokens > 30k
-        yield ("values", {"messages": ["x" * 250_000], "files": {}})
+        yield ((), "values", {"messages": ["x" * 250_000], "files": {}})
 
     fake_agent = MagicMock()
     fake_agent.astream = fake_astream
