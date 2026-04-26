@@ -13,6 +13,8 @@ release is cut.
 - Research dashboard main content layout: workflow tree and final response now
   display in a 2-column view (side-by-side) instead of stacked vertically,
   enabling users to correlate agent decisions with final output simultaneously.
+- WorkflowTree section background darkened (bg-surface/50) to create visual
+  hierarchy and help users focus on the final report on the right.
 
 ## [0.2.0] - 2026-04-26
 
