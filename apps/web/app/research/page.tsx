@@ -95,7 +95,7 @@ export default function ResearchPage() {
           <FileList files={state.files} />
         </aside>
         <div className="flex min-w-0 flex-1 gap-px bg-hairline">
-          <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto bg-canvas">
+          <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto bg-surface/50">
             <WorkflowTree workflow={state.workflow} />
           </section>
           <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto bg-canvas">
