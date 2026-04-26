@@ -1,12 +1,15 @@
+import json
 import logging
 import uuid
 from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 import tiktoken
 
 from app.config.settings import settings
 from app.streaming import events
+from app.streaming.events import AgentRole
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +57,15 @@ class ChunkMapper:
     def __init__(self) -> None:
         self._prev_files: dict[str, str] = {}
         self._prev_todos: list[dict] = []
-        # Tracks tool_call_ids for in-flight `task`-tool subagent invocations.
-        # deepagents invokes subagents inside the `task` tool, so tool_call_id
-        # is the stable identifier across start/complete.
-        self._active_subagents: set[str] = set()
-        # Tool-call ids we've already emitted a reflection_logged event for.
-        # Prevents duplicates when LangGraph re-broadcasts the same message.
+        # Maps tool_call_id → subagent_type (e.g. "researcher", "critic") for
+        # in-flight `task`-tool subagent invocations. Holding the type lets us
+        # attribute reflections and tool calls to the actual subagent rather
+        # than always saying "researcher" when any task is in flight.
+        self._active_subagents: dict[str, str] = {}
         self._emitted_reflections: set[str] = set()
+        self._emitted_tool_starts: set[str] = set()
+        self._emitted_tool_completions: set[str] = set()
+        self._tool_call_starts: dict[str, datetime] = {}
         self._prev_token_count: int | None = None
 
         # Public introspection for the router's synthetic-compression fallback
@@ -70,11 +75,42 @@ class ChunkMapper:
         # Diagnostic: every LangGraph node name seen during this stream
         self.seen_nodes: set[str] = set()
 
+        # Token tracking per agent role for observability
+        self.tokens_by_role: dict[AgentRole, int] = {
+            "main": 0,
+            "researcher": 0,
+            "critic": 0,
+        }
+
+    def _infer_role(self) -> AgentRole:
+        if not self._active_subagents:
+            return "main"
+
+        last_type = next(reversed(self._active_subagents.values()))
+        if last_type in ("researcher", "critic"):
+            return last_type  # type: ignore[return-value]
+
+        return "main"
+
+    def _track_token_usage(self, msg: Any) -> None:
+        """Update tokens_by_role from message usage_metadata."""
+        meta = getattr(msg, "usage_metadata", None)
+        if not meta:
+            return
+        role = self._infer_role()
+        input_tok = meta.get("input_tokens", 0)
+        output_tok = meta.get("output_tokens", 0)
+        cache_read = (meta.get("input_token_details") or {}).get("cache_read", 0)
+        # Cached input is billed at ~50% rate
+        tokens = input_tok - cache_read // 2 + output_tok
+        self.tokens_by_role[role] += tokens
+
     async def process(self, mode: str, chunk: Any) -> AsyncGenerator[dict, None]:
         logger.debug("[CHUNK_MAPPER] mode=%s", mode)
         if mode == "updates":
             async for ev in self._handle_updates(chunk):
                 yield ev
+
         elif mode == "messages":
             msg_chunk, _meta = chunk
             # Only stream text from AI (assistant) message chunks.
@@ -84,6 +120,7 @@ class ChunkMapper:
             if msg_type not in ("ai", "AIMessageChunk"):
                 logger.debug("[CHUNK_MAPPER] messages: skipping non-AI chunk type=%s", msg_type)
                 return
+            self._track_token_usage(msg_chunk)
             tool_calls = getattr(msg_chunk, "tool_calls", None) or []
             for tc in tool_calls:
                 logger.info(
@@ -94,6 +131,7 @@ class ChunkMapper:
             content: str = getattr(msg_chunk, "content", None) or ""
             if content:
                 yield events.text_delta(content)
+
         elif mode == "values":
             async for ev in self._handle_values_snapshot(chunk):
                 yield ev
@@ -139,15 +177,27 @@ class ChunkMapper:
             # otherwise it came from the main agent.
             for msg in _as_list(update.get("messages")):
                 for tc in getattr(msg, "tool_calls", None) or []:
-                    tc_name = tc.get("name")
+                    tc_name = tc.get("name") or "unknown"
                     tc_id = tc.get("id")
+                    args = tc.get("args") or {}
+
+                    if tc_id and tc_id not in self._emitted_tool_starts:
+                        self._emitted_tool_starts.add(tc_id)
+                        self._tool_call_starts[tc_id] = datetime.now(UTC)
+                        try:
+                            args_preview = json.dumps(args, default=str)
+                        except (TypeError, ValueError):
+                            args_preview = str(args)
+                        yield events.tool_call_started(
+                            tc_id, self._infer_role(), tc_name, args_preview
+                        )
+
                     if tc_name == "task":
                         if not tc_id or tc_id in self._active_subagents:
                             continue
-                        args = tc.get("args") or {}
                         subagent_type = args.get("subagent_type", "unknown")
                         description = args.get("description", "")
-                        self._active_subagents.add(tc_id)
+                        self._active_subagents[tc_id] = subagent_type
                         logger.info(
                             "[CHUNK_MAPPER] subagent_started tool_call_id=%s type=%s desc=%r",
                             tc_id,
@@ -158,14 +208,13 @@ class ChunkMapper:
                     elif tc_name == "think_tool":
                         if not tc_id or tc_id in self._emitted_reflections:
                             continue
-                        args = tc.get("args") or {}
+
                         reflection = args.get("reflection", "")
                         if not isinstance(reflection, str) or not reflection:
                             continue
-                        role: Literal["main", "researcher"] = (
-                            "researcher" if self._active_subagents else "main"
-                        )
+
                         self._emitted_reflections.add(tc_id)
+                        role = self._infer_role()
                         logger.info(
                             "[CHUNK_MAPPER] reflection_logged role=%s text=%r",
                             role,
@@ -174,16 +223,30 @@ class ChunkMapper:
                         yield events.reflection_logged(role, reflection)
 
                 tool_call_id = getattr(msg, "tool_call_id", None)
-                if tool_call_id and tool_call_id in self._active_subagents:
-                    self._active_subagents.discard(tool_call_id)
+                if tool_call_id:
                     content = getattr(msg, "content", "") or ""
                     content_str = content if isinstance(content, str) else str(content)
-                    logger.info(
-                        "[CHUNK_MAPPER] subagent_completed tool_call_id=%s summary=%r",
-                        tool_call_id,
-                        content_str[:120],
-                    )
-                    yield events.subagent_completed(tool_call_id, content_str[:500])
+                    if (
+                        tool_call_id in self._tool_call_starts
+                        and tool_call_id not in self._emitted_tool_completions
+                    ):
+                        self._emitted_tool_completions.add(tool_call_id)
+                        start = self._tool_call_starts[tool_call_id]
+                        duration_ms = int((datetime.now(UTC) - start).total_seconds() * 1000)
+                        msg_status = getattr(msg, "status", None)
+                        status: Literal["ok", "error"] = "error" if msg_status == "error" else "ok"
+                        yield events.tool_call_completed(
+                            tool_call_id, status, content_str, duration_ms
+                        )
+
+                    if tool_call_id in self._active_subagents:
+                        self._active_subagents.pop(tool_call_id, None)
+                        logger.info(
+                            "[CHUNK_MAPPER] subagent_completed tool_call_id=%s summary=%r",
+                            tool_call_id,
+                            content_str[:120],
+                        )
+                        yield events.subagent_completed(tool_call_id, content_str[:500])
 
     async def _handle_values_snapshot(self, snapshot: dict) -> AsyncGenerator[dict, None]:
         try:

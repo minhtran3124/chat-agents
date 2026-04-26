@@ -14,11 +14,28 @@ export type CompressionEvent = {
   synthetic?: boolean;
 };
 
-export type ReflectionRole = "main" | "researcher";
+export type AgentRole = "main" | "researcher" | "critic";
+export type ReflectionRole = AgentRole;
 export type Reflection = {
   role: ReflectionRole;
   reflection: string;
   at: number;
+};
+
+export type ToolCallStatus = "running" | "ok" | "error";
+
+export type ToolCallNode = {
+  id: string;
+  role: AgentRole;
+  toolName: string;
+  argsPreview: string;
+  status: ToolCallStatus;
+  resultPreview?: string;
+  durationMs?: number;
+  parentId: string | null;
+  childIds: string[];
+  files: string[];
+  startedAt: number;
 };
 
 export type ErrorReason = "timeout" | "internal" | "rate_limited";
@@ -33,8 +50,21 @@ export type SSEEventMap = {
   compression_triggered: CompressionEvent;
   text_delta: { content: string };
   reflection_logged: { role: ReflectionRole; reflection: string };
+  tool_call_started: {
+    id: string;
+    role: AgentRole;
+    tool_name: string;
+    args_preview: string;
+  };
+  tool_call_completed: {
+    id: string;
+    status: "ok" | "error";
+    result_preview: string;
+    duration_ms: number;
+  };
   error: { message: string; reason: ErrorReason; recoverable: boolean };
   budget_exceeded: { tokens_used: number; limit: number; message: string };
+  token_breakdown: { breakdown: Record<AgentRole, number> };
   stream_end: {
     final_report: string;
     usage: Record<string, unknown>;

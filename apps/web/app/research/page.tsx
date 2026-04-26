@@ -6,11 +6,13 @@ import { TodoList } from "./components/TodoList";
 import { FileList } from "./components/FileList";
 import { SubagentPanel } from "./components/SubagentPanel";
 import { ReflectionPanel } from "./components/ReflectionPanel";
+import { TokenBreakdownPanel } from "./components/TokenBreakdownPanel";
 import { ReportView } from "./components/ReportView";
 import { StatusBadge } from "./components/StatusBadge";
 import { ToastStack, ToastItem } from "./components/SubagentToast";
 import { AskedCard } from "./components/AskedCard";
 import { ErrorView } from "./components/ErrorView";
+import { WorkflowTree } from "./components/WorkflowTree";
 
 export default function ResearchPage() {
   const { state, start, reset } = useResearchStream();
@@ -88,10 +90,12 @@ export default function ResearchPage() {
         <aside className="scrollbar-quiet w-[360px] flex-shrink-0 overflow-y-auto border-r border-hairline bg-surface/50">
           <TodoList items={state.todos} />
           <SubagentPanel runs={state.subagents} compressions={state.compressions} />
+          <TokenBreakdownPanel breakdown={state.tokenBreakdown} />
           <ReflectionPanel reflections={state.reflections} />
           <FileList files={state.files} />
         </aside>
         <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto">
+          <WorkflowTree workflow={state.workflow} />
           {state.status === "error" ? (
             <ErrorView
               error={state.error}

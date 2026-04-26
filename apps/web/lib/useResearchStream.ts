@@ -1,7 +1,16 @@
 "use client";
 import { useReducer, useRef } from "react";
 import { consumeFrames, leftoverAfterFrames, SSEFrame } from "./sseParser";
-import { TodoItem, FileRef, SubagentRun, CompressionEvent, Reflection, ErrorReason } from "./types";
+import {
+  TodoItem,
+  FileRef,
+  SubagentRun,
+  CompressionEvent,
+  Reflection,
+  ErrorReason,
+  ToolCallNode,
+  AgentRole,
+} from "./types";
 
 function newThreadId(): string {
   return crypto.randomUUID();
@@ -9,12 +18,27 @@ function newThreadId(): string {
 
 export type ReportSource = "stream" | "file" | "error";
 
+export type WorkflowState = {
+  nodes: Record<string, ToolCallNode>;
+  rootIds: string[];
+  taskStack: string[];
+  lastNonTaskCallId: string | null;
+};
+
+const emptyWorkflow: WorkflowState = {
+  nodes: {},
+  rootIds: [],
+  taskStack: [],
+  lastNonTaskCallId: null,
+};
+
 export type ResearchState = {
   todos: TodoItem[];
   files: FileRef[];
   subagents: Record<string, SubagentRun>;
   compressions: CompressionEvent[];
   reflections: Reflection[];
+  workflow: WorkflowState;
   report: string;
   reportSource: ReportSource | null;
   status: "idle" | "loading" | "streaming" | "done" | "error";
@@ -23,6 +47,7 @@ export type ResearchState = {
   errorReason?: ErrorReason;
   errorRecoverable?: boolean;
   budgetExceeded?: { tokens_used: number; limit: number; message: string };
+  tokenBreakdown?: Record<AgentRole, number>;
 };
 
 export const initial: ResearchState = {
@@ -31,6 +56,7 @@ export const initial: ResearchState = {
   subagents: {},
   compressions: [],
   reflections: [],
+  workflow: emptyWorkflow,
   report: "",
   reportSource: null,
   status: "idle",
@@ -48,8 +74,87 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
       return { ...initial, status: "streaming", question: state.question };
     case "todo_updated":
       return { ...state, todos: data.items };
-    case "file_saved":
-      return { ...state, files: [...state.files.filter((f) => f.path !== data.path), data] };
+    case "file_saved": {
+      const nextFiles = [...state.files.filter((f) => f.path !== data.path), data];
+      const ownerId = state.workflow.lastNonTaskCallId;
+      if (!ownerId || !state.workflow.nodes[ownerId]) {
+        return { ...state, files: nextFiles };
+      }
+      const owner = state.workflow.nodes[ownerId];
+      if (owner.files.includes(data.path)) {
+        return { ...state, files: nextFiles };
+      }
+      return {
+        ...state,
+        files: nextFiles,
+        workflow: {
+          ...state.workflow,
+          nodes: {
+            ...state.workflow.nodes,
+            [ownerId]: { ...owner, files: [...owner.files, data.path] },
+          },
+        },
+      };
+    }
+    case "tool_call_started": {
+      if (state.workflow.nodes[data.id]) return state;
+      const parentId = state.workflow.taskStack[state.workflow.taskStack.length - 1] ?? null;
+      const node: ToolCallNode = {
+        id: data.id,
+        role: data.role,
+        toolName: data.tool_name,
+        argsPreview: data.args_preview,
+        status: "running",
+        parentId,
+        childIds: [],
+        files: [],
+        startedAt: Date.now(),
+      };
+      const nodes: Record<string, ToolCallNode> = {
+        ...state.workflow.nodes,
+        [data.id]: node,
+      };
+      let rootIds = state.workflow.rootIds;
+      if (parentId) {
+        const parent = nodes[parentId];
+        if (parent) {
+          nodes[parentId] = { ...parent, childIds: [...parent.childIds, data.id] };
+        }
+      } else {
+        rootIds = [...rootIds, data.id];
+      }
+      const isTask = data.tool_name === "task";
+      return {
+        ...state,
+        workflow: {
+          nodes,
+          rootIds,
+          taskStack: isTask ? [...state.workflow.taskStack, data.id] : state.workflow.taskStack,
+          lastNonTaskCallId: isTask ? state.workflow.lastNonTaskCallId : data.id,
+        },
+      };
+    }
+    case "tool_call_completed": {
+      const node = state.workflow.nodes[data.id];
+      if (!node) return state;
+      const updated: ToolCallNode = {
+        ...node,
+        status: data.status,
+        resultPreview: data.result_preview,
+        durationMs: data.duration_ms,
+      };
+      const isTaskTop = state.workflow.taskStack[state.workflow.taskStack.length - 1] === data.id;
+      return {
+        ...state,
+        workflow: {
+          ...state.workflow,
+          nodes: { ...state.workflow.nodes, [data.id]: updated },
+          taskStack: isTaskTop ? state.workflow.taskStack.slice(0, -1) : state.workflow.taskStack,
+          lastNonTaskCallId:
+            state.workflow.lastNonTaskCallId === data.id ? null : state.workflow.lastNonTaskCallId,
+        },
+      };
+    }
     case "subagent_started":
       return {
         ...state,
@@ -91,6 +196,8 @@ export function reducer(state: ResearchState, frame: SSEFrame): ResearchState {
         error: data.message,
         errorRecoverable: false,
       };
+    case "token_breakdown":
+      return { ...state, tokenBreakdown: data.breakdown };
     case "stream_end":
       // Error path: `error` event already set status:"error". stream_end is
       // just the terminal signal — freeze partial state, do NOT flip to "done",

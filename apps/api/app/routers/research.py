@@ -32,6 +32,11 @@ FALLBACK_DRAFT_FILENAME = "draft.md"
 def _extract_token_count(msg: Any) -> int:
     """Read usage_metadata from an AIMessageChunk. Returns 0 if absent.
 
+    Cached input is billed at ~50% of the regular rate by OpenAI/Anthropic,
+    so the budget guard subtracts half of any cache_read tokens to reflect
+    the real spend. Without this, runs over-report by 30-50% on cache-heavy
+    flows and trip the budget cap prematurely.
+
     LangChain populates usage_metadata on the final chunk of each message
     turn — the counter lags by at most one turn, acceptable for a budget
     guard that only needs to catch overruns.
@@ -39,7 +44,10 @@ def _extract_token_count(msg: Any) -> int:
     meta = getattr(msg, "usage_metadata", None)
     if not meta:
         return 0
-    return meta.get("input_tokens", 0) + meta.get("output_tokens", 0)
+    input_tok = meta.get("input_tokens", 0)
+    output_tok = meta.get("output_tokens", 0)
+    cache_read = (meta.get("input_token_details") or {}).get("cache_read", 0)
+    return input_tok - cache_read // 2 + output_tok
 
 
 router = APIRouter(prefix="/research", tags=["research"])
@@ -85,7 +93,7 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
         try:
             cumulative_tokens = 0
             async with asyncio.timeout(settings.RESEARCH_TIMEOUT_S):
-                async for mode, chunk in agent.astream(
+                async for _ns, mode, chunk in agent.astream(
                     {"messages": [{"role": "user", "content": payload.question}]},
                     config={
                         "configurable": {"thread_id": thread_id},
@@ -96,6 +104,7 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
                         "tags": [settings.LLM_PROVIDER],
                     },
                     stream_mode=["values", "messages", "updates"],
+                    subgraphs=True,
                 ):
                     if mode == "messages":
                         # chunk is (AIMessageChunk, metadata_dict) in messages mode.
@@ -191,7 +200,9 @@ async def research(payload: ResearchRequest) -> EventSourceResponse:
                     final_report_source=final_report_source,
                     nodes_seen=sorted(mapper.seen_nodes),
                     usage=usage,
+                    tokens_by_role=mapper.tokens_by_role,
                 )
+                yield events.token_breakdown(mapper.tokens_by_role)
                 yield events.stream_end(
                     final_report=final_report,
                     usage=usage,
