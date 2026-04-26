@@ -9,6 +9,8 @@ release is cut.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-26
+
 ### Added
 - `RESEARCH_TIMEOUT_S` setting (default 500s, bounded 10–3600) enforced around
   agent streaming via `asyncio.timeout`.
