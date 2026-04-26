@@ -94,20 +94,24 @@ export default function ResearchPage() {
           <ReflectionPanel reflections={state.reflections} />
           <FileList files={state.files} />
         </aside>
-        <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto">
-          <WorkflowTree workflow={state.workflow} />
-          {state.status === "error" ? (
-            <ErrorView
-              error={state.error}
-              reason={state.errorReason}
-              recoverable={state.errorRecoverable}
-              budgetExceeded={state.budgetExceeded}
-              onReset={reset}
-            />
-          ) : (
-            <ReportView text={state.report} status={state.status} source={state.reportSource} />
-          )}
-        </section>
+        <div className="flex min-w-0 flex-1 gap-px bg-hairline">
+          <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto bg-canvas">
+            <WorkflowTree workflow={state.workflow} />
+          </section>
+          <section className="scrollbar-quiet min-w-0 flex-1 overflow-y-auto bg-canvas">
+            {state.status === "error" ? (
+              <ErrorView
+                error={state.error}
+                reason={state.errorReason}
+                recoverable={state.errorRecoverable}
+                budgetExceeded={state.budgetExceeded}
+                onReset={reset}
+              />
+            ) : (
+              <ReportView text={state.report} status={state.status} source={state.reportSource} />
+            )}
+          </section>
+        </div>
       </main>
 
       <ToastStack items={toasts} onDismiss={dismissToast} />
