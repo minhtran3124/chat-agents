@@ -9,6 +9,11 @@ release is cut.
 
 ## [Unreleased]
 
+### Changed
+- Research dashboard main content layout: workflow tree and final response now
+  display in a 2-column view (side-by-side) instead of stacked vertically,
+  enabling users to correlate agent decisions with final output simultaneously.
+
 ## [0.2.0] - 2026-04-26
 
 ### Added
