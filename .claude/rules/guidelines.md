@@ -110,19 +110,32 @@ This file covers **how to write code** that fits the project's conventions.
 
 ---
 
-## Styling — Tailwind CSS (No Component Library)
+## Styling & Components
 
-> The project does **not** use shadcn/ui, Radix, Material-UI, or Chakra. Do not add `import { Button } from "@/components/ui/button"` — it doesn't exist. Build with Tailwind utilities.
+### Foundation: Tailwind CSS
 
 - **Tailwind 3.4** with `@tailwindcss/typography` (the `prose` class renders markdown from `react-markdown`).
 - **Class ordering is enforced by `prettier-plugin-tailwindcss`**. Don't hand-sort. Run `prettier --write` and stop second-guessing.
-- **Extract a component before extracting a `className` variable.** If the same class string repeats 3+ times, make a component.
 - Use **semantic HTML** first (`<button>`, `<nav>`, `<article>`, `<main>`), Tailwind for appearance.
 - **Mobile-first responsive**: unprefixed classes are mobile; use `sm:` / `md:` / `lg:` / `xl:` for breakpoints. Never write desktop-first with `max-md:` overrides unless there's a concrete reason.
 - Use `tailwind.config.ts` to extend the theme (colors, fonts, spacing) — don't inline arbitrary `[value]` classes more than once. If it repeats, lift it to the theme.
 - Keep `tailwind.config.ts`'s `content` globs accurate so unused classes are purged.
 
-If a component library is introduced later, add a section here covering import patterns, theming, and interaction with Tailwind.
+### Component Libraries: When to Use
+
+Component libraries (shadcn/ui, Headless UI, Radix, etc.) are adopted **strategically** for:
+- **Complex interactive patterns:** Modals, dropdowns, tooltips, tables, date pickers, form validation.
+- **Accessibility:** Built-in ARIA, keyboard navigation, focus management.
+- **Reduced workload:** Avoid reimplementing common patterns; focus on domain logic.
+
+**Do not use component libraries for:**
+- Simple presentational elements (buttons, badges, cards) — build these with Tailwind.
+- One-off custom UI unique to this app — keep it simple.
+
+**Integration:**
+- Component libraries should be styled with Tailwind via CSS variables or utility classes.
+- All components (custom or from libraries) must render with `prettier-plugin-tailwindcss`-compatible output.
+- If adopting a new library, update `tailwind.config.ts` and document its theme integration here.
 
 ---
 

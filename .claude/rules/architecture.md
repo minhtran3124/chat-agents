@@ -140,7 +140,7 @@ apps/web/
 | Testing           | `vitest` + `@testing-library/react` + `jsdom`                         |
 | Format / lint     | `prettier`, `prettier-plugin-tailwindcss`, ESLint (`eslint-config-next`) |
 
-**No component library.** The project does not use shadcn/ui, Radix, Material-UI, or Chakra. Components are hand-built with Tailwind utility classes. See `guidelines.md` → *Styling: Tailwind CSS* for conventions.
+**Component libraries allowed.** The project uses Tailwind CSS as the foundation. Component libraries (shadcn/ui, Headless UI, Radix, etc.) are adopted strategically for complex interactive patterns (modals, dropdowns, date pickers, tables) where they reduce workload and improve accessibility. See `guidelines.md` → *Styling & Components* for conventions.
 
 ---
 
